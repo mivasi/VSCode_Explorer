@@ -5,26 +5,50 @@ var fs = require("fs");
 var drivelist = require("drivelist");
 var clone = require("clone");
 
-function quick_pick(uri, dirList) {
-    // Add in options for navigation
-    var options = ["Back", "Select"];
+var commands = [
+    "> ..",
+    "> Select"
+];
+
+function list_drives(callback) {
+    var dirList = [];
+    drivelist.list(
+        (error, drives) => {
+            drives.forEach(function(drive) {
+                dirList.push(drive.mountpoints[0].path);
+            }, this);
+
+            // Set the uri and commands to signal change in drive 
+            var uri = undefined; 
+            quick_pick(uri, dirList, [], callback);
+        }
+    );
+}
+
+function quick_pick(uri, dirList, options, callback) {
+    // Add in commands for navigation
     dirList = options.concat(dirList);
 
     // Returns the result of a recursive query to quickpick
-    return vscode.window.showQuickPick(dirList)
+    vscode.window.showQuickPick(dirList)
     .then(
         val => {
             if(uri == undefined) {
-                uri = val; 
-                val = "";
+                if(options.indexOf(val) >= 0) {
+                    list_drives(callback);
+                }
+                else {
+                    uri = val;
+                    val = "";
+                }
             }
 
-            return query_recursive(uri, val)
+            navigate_recursive(uri, val, callback)
         }
     )
 }
 
-function query_recursive(uriPrev, result) {
+function navigate_recursive(uriPrev, result, callback) {
     // Resolves the previous URI into a real path
     uriPrev = fs.realpathSync(uriPrev);
 
@@ -34,8 +58,9 @@ function query_recursive(uriPrev, result) {
     // Handling special cases
     switch(result) {
         case undefined: 
+            callback(undefined);
             return;
-        case "Back": {
+        case "> ..": {
             result = "";
             var splitUri = uri.split(path.sep);
             splitUri = splitUri.filter(Boolean);
@@ -49,11 +74,9 @@ function query_recursive(uriPrev, result) {
             }
             break;
         }
-        case "Search": {
-            return query_fuzzy(uri);
-        }
-        case "Select": {
-            return uri;
+        case "> Select": {
+            callback(uri);
+            return;
         }
     }
 
@@ -65,7 +88,7 @@ function query_recursive(uriPrev, result) {
         uri = path.join(uri, result);
 
         if(fs.lstatSync(uri).isFile())
-            return uri;
+            callback(uri);
 
         try {
             dirList = fs.readdirSync(uri);
@@ -77,36 +100,16 @@ function query_recursive(uriPrev, result) {
             dirList = fs.readdirSync(uri);
         }
         
-        return quick_pick(uri, dirList);
+        quick_pick(uri, dirList, commands, callback);
     }
     else {
-        // Here we have a callback that creates a second thread
-        // This causes the quick_pick to diverge
-        // One of them will return with a garbage value
-        // The other will continue to run
-        // However, because the first one returned
-        // The command's lifespan has ended
-        drivelist.list(
-            (error, drives) => {
-                drives.forEach(function(drive) {
-                    dirList.push(drive.mountpoints[0].path);
-                }, this);
-                
-                return quick_pick(uri, dirList);
-            }
-        );
-        return quick_pick(uri, dirList);
+        list_drives(callback);
     }
 };
 
-function query(start_uri) {
+function navigate(start_uri, callback) {
     // Returns a promise that resolves to the result of a recursive query
-    return Promise.resolve(
-        query_recursive(start_uri, "")
-            .then(
-                uri => { return uri }
-            )
-        );
+    navigate_recursive(start_uri, "", callback);
 };
 
-exports.query = query;
+exports.navigate = navigate;

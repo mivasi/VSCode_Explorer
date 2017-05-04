@@ -1,26 +1,25 @@
 // The module "vscode" contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 var vscode = require("vscode");
+var fs = require("fs");
 var query_uri = require("./query_uri.js");
 
 function open(uri) {
-    var doc = new vscode.TextDocument(uri);
-    vscode.window.showTextDocument(doc);
+    if(uri === undefined)
+        return;
+
+    if(fs.lstatSync(uri).isFile())
+        vscode.commands.executeCommand("vscode.open", uri);
+    else
+        vscode.commands.executeCommand("vscode.openFolder", uri);
 };
 
 var open_uri = function(state) {
     let start = state.get("rootPath");
     start = start === undefined ? "" : start;
 
-    // Does a query using the current path if available
-    query_uri.query(start)
-    // If this succeeds, pass the URI to the open function
-    .then(
-        uri => {
-            if(uri != undefined) {
-                open(uri);
-            }
-        });
+    // Does a.navigate using the current path if available
+    query_uri.navigate(start, open);
 };
 
 function set(state, uri) {
@@ -32,15 +31,8 @@ var set_root = function(state) {
     let start = state.get("rootPath");
     start = start === undefined ? "" : start;
 
-    // Does a query using the current path if available
-    query_uri.query(start)
-    // If this succeeds, pass the URI to the open function
-    .then(
-        uri => {
-            if(uri != undefined) {
-                set(state, uri);
-            }
-        });
+    // Does a.navigate using the current path if available
+    query_uri.navigate(start, set.bind(null, state));
 };
 
 function reg(state, name, uri) {
@@ -48,7 +40,16 @@ function reg(state, name, uri) {
     var list = state.get("regPath");
     list = list === undefined ? [] : list;
     var entry = {name, uri};
-    list.push(entry);
+
+    // Check for duplicates
+    var found = false;
+    list.forEach(function(element) {
+        if(element.name === name) 
+            found = true;
+    }, this);
+
+    if(!found)
+        list.push(entry);
 
     state.update("regPath", list);
 };
@@ -57,15 +58,8 @@ var query_path = function(state, name) {
    let start = state.get("rootPath");
     start = start === undefined ? "" : start;
     
-    // Does a query using the current path if available
-    query_uri.query(start)
-    // If this succeeds, pass the URI to the open function
-    .then(
-        uri => {
-            if(uri != undefined) {
-                reg(state, name, uri);
-            }
-        });
+    // Does a.navigate using the current path if available
+    query_uri.navigate(start, reg.bind(null, state, name));
 };
 
 var query_name = function() {
@@ -75,16 +69,17 @@ var query_name = function() {
 var reg_uri = function(state) {
     query_name()
     .then(
-        val => { query_path(state, val) }
+        val => {query_path(state, val) }
     );
  };
 
 function del(state, name) {
     var list = state.get("regPath");
-    var out = []
+    var out = [];
+
     list.forEach(function(element) {
         if(name != element.name)
-            out.append(element);
+            out.push(element);
     }, this);
 
     state.update("regPath", out);

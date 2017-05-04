@@ -13,7 +13,8 @@
     "activationEvents": [
         "onCommand:extension.openPath",
         "onCommand:extension.setRoot",
-        "onCommand:extension.registerPath"
+        "onCommand:extension.registerPath",
+        "onCommand:extension.deregisterPath"
     ],
     "main": "./extension",
     "contributes": {
@@ -32,7 +33,7 @@
         },
         {
             "command": "extension.deregisterPath",
-            "title": "De-Register Path"
+            "title": "Deregister Path"
         }],
         "configuration": {
             "type": "object",
