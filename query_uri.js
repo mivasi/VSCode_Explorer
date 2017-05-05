@@ -38,7 +38,7 @@ function quick_pick(uri, dirList, options, callback) {
                     list_drives(callback);
                 }
                 else {
-                    uri = val;
+                    uri = path.join(val, path.sep);
                     val = "";
                 }
             }
@@ -50,7 +50,7 @@ function quick_pick(uri, dirList, options, callback) {
 
 function navigate_recursive(uriPrev, result, callback) {
     // Resolves the previous URI into a real path
-    uriPrev = fs.realpathSync(uriPrev);
+    uriPrev = path.resolve(uriPrev);
 
     // Clones the previous URI to use for this iteration
     var uri = clone(uriPrev);
