@@ -34,23 +34,7 @@
         {
             "command": "extension.deregisterPath",
             "title": "Deregister Path"
-        }],
-        "configuration": {
-            "type": "object",
-            "title": "Fuzzy Open Configuration",
-            "properties": {
-                "fuzzyopen.rootPath": {
-                    "type": "string",
-                    "title": "Root Path",
-                    "default": ""
-                }, 
-                "fuzzyopen.regPath": {
-                    "type": "list",
-                    "title": "Registered Paths",
-                    "default": []
-                }
-            }
-        }
+        }]
     },
     "scripts": {
         "postinstall": "node ./node_modules/vscode/bin/install",
@@ -58,7 +42,6 @@
     },
     "dependencies": {
         "fs": "^0.0.1-security",
-        "file-url": "^2.0.0",
         "clone": "^2.0.0",
         "drivelist": "^5.0.0"
     },
