@@ -6,8 +6,9 @@ var drivelist = require("drivelist");
 var clone = require("clone");
 
 var commands = [
-    "> ..",
-    "> Select"
+    ">..",
+    ">Select",
+    ">Query"
 ];
 
 function list_drives(callback) {
@@ -62,7 +63,7 @@ function option_handler(pathCurr, result, callback) {
         case undefined: 
             callback(undefined);
             return undefined;
-        case "> ..": {
+        case commands[0]: {
             var splitPath = pathCurr.split(path.sep);
             splitPath = splitPath.filter(Boolean);
  
@@ -77,9 +78,12 @@ function option_handler(pathCurr, result, callback) {
             }
             return pathCurr;
         }
-        case "> Select": {
+        case commands[1]: {
             callback(pathCurr);
             return undefined;
+        }
+        case commands[2]: {
+            fuzzy_find(pathCurr, callback);
         }
     }
     // If nothing happens from the special cases, means we are moving into a new dir
@@ -134,7 +138,7 @@ function navigate(startPath, callback) {
 
 exports.navigate = navigate;
 
-function fuzzy_query_recursive(pathPrev, result, callback) {
+function fuzzy_find_recursive(pathPrev, result, callback) {
     // Resolves the previous path into a real path
     pathPrev = path.resolve(pathPrev);
 
@@ -145,8 +149,8 @@ function fuzzy_query_recursive(pathPrev, result, callback) {
         return;
 };
 
-function fuzzy_query(startPath, callback) {
-    fuzzy_query_recursive(startPath, "", callback);
+function fuzzy_find(startPath, callback) {
+    fuzzy_find_recursive(startPath, "", callback);
 };
 
-exports.query = fuzzy_query;
+exports.fuzzy_find = fuzzy_find;

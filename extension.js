@@ -23,7 +23,7 @@ function open(path) {
     }
 };
 
-var open_path = function(state) {
+var navigate = function(state) {
     let start = state.get("rootPath");
     start = start === undefined ? "" : start;
 
@@ -44,7 +44,7 @@ var set_root = function(state) {
     query_path.navigate(start, set.bind(null, state));
 };
 
-function reg(state, name, path) {
+function add(state, name, path) {
     // Registers a name to a path
     var list = state.get("regPath");
     list = list === undefined ? [] : list;
@@ -68,14 +68,14 @@ var nav_path = function(state, name) {
     start = start === undefined ? "" : start;
     
     // Does a.navigate using the current path if available
-    query_path.navigate(start, reg.bind(null, state, name));
+    query_path.navigate(start, add.bind(null, state, name));
 };
 
 var query_name = function() {
     return vscode.window.showInputBox({prompt: "Enter a name"});
 };
 
-var reg_path = function(state) {
+var add_bookmark = function(state) {
     query_name()
     .then(
         val => { nav_path(state, val) }
@@ -94,7 +94,7 @@ function del(state, name) {
     state.update("regPath", out);
 }; 
 
-var del_path = function(state) {
+var del_bookmark = function(state) {
     var list = state.get("regPath");
     if(list === undefined) {
         vscode.window.showInformationMessage("No registered paths");
@@ -120,26 +120,26 @@ function activate(context) {
 
     // Use the console to output diagnostic information (console.log) and errors (console.error)
     // This line of code will only be executed once when your extension is activated
-    console.log("FuzzyOpen is now available in VS Code");
+    console.log("FuzzyCode is now available in VS Code");
 
     var state = context.globalState;
 
     // The command has been defined in the package.json file
     // Now provide the implementation of the command with registerCommand
     // The commandId parameter must match the command field in package.json
-    var openCommand = vscode.commands.registerCommand("extension.openPath", 
-    () => { open_path(state) } );
+    var navCommand = vscode.commands.registerCommand("extension.navigate", 
+    () => { navigate(state) } );
     var setCommand = vscode.commands.registerCommand("extension.setRoot",
     () => { set_root(state) } );
-    var regCommand = vscode.commands.registerCommand("extension.registerPath", 
-    () => { reg_path(state) } );
-    var delCommand = vscode.commands.registerCommand("extension.deregisterPath",
-    () => { del_path(state) } );
+    var addCommand = vscode.commands.registerCommand("extension.addBookmark", 
+    () => { add_bookmark(state) } );
+    var delCommand = vscode.commands.registerCommand("extension.removeBookmark",
+    () => { del_bookmark(state) } );
 
     // Add to a list of disposables that die when the extension deactivates
-    context.subscriptions.push(openCommand);
+    context.subscriptions.push(navCommand);
     context.subscriptions.push(setCommand);
-    context.subscriptions.push(regCommand);
+    context.subscriptions.push(addCommand);
     context.subscriptions.push(delCommand);
     context.subscriptions.push(state);
 }

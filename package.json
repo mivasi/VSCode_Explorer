@@ -1,7 +1,7 @@
 {
     "name": "fuzzyopen",
-    "displayName": "Fuzzy Open",
-    "description": "Fuzzy Opens a Path using the Command Palette",
+    "displayName": "Fuzzy Code",
+    "description": "Provides commands to navigate to and open files/folders from VS Code Command Palette",
     "version": "0.0.1",
     "publisher": "Julwrites",
     "engines": {
@@ -11,29 +11,29 @@
         "Other"
     ],
     "activationEvents": [
-        "onCommand:extension.openPath",
+        "onCommand:extension.navigate",
         "onCommand:extension.setRoot",
-        "onCommand:extension.registerPath",
-        "onCommand:extension.deregisterPath"
+        "onCommand:extension.addBookmark",
+        "onCommand:extension.removeBookmark"
     ],
     "main": "./extension",
     "contributes": {
         "commands": [
         {
-            "command": "extension.openPath",
-            "title": "Open Path"
+            "command": "extension.navigate",
+            "title": "Navigate"
         }, 
         {
             "command": "extension.setRoot",
             "title": "Set Root Path"
         },
         {
-            "command": "extension.registerPath",
-            "title": "Register Path"
+            "command": "extension.addBookmark",
+            "title": "Add Bookmark"
         },
         {
-            "command": "extension.deregisterPath",
-            "title": "Deregister Path"
+            "command": "extension.removeBookmark",
+            "title": "Remove Bookmark"
         }]
     },
     "scripts": {
