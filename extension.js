@@ -2,22 +2,23 @@
 // Import the module and reference it with the alias vscode in your code below
 var vscode = require("vscode");
 var fs = require("fs");
+var path = require("path");
 var query_path = require("./query_path.js");
 
-function open(path) {
-    if(path === undefined)
+function open(navPath) {
+    if(navPath === undefined)
         return;
 
-    if(fs.lstatSync(path).isFile()) {
-        vscode.workspace.openTextDocument(path)
+    if(fs.lstatSync(navPath).isFile()) {
+        vscode.workspace.openTextDocument(navPath)
         .then(
             function(doc) {
                 vscode.window.showTextDocument(doc);
             }
         );
     }
-    else if(fs.lstatSync(path).isDirectory()) {
-        let uri = vscode.Uri.parse(path);
+    else if(fs.lstatSync(navPath).isDirectory()) {
+        let uri = vscode.Uri.parse("file:" + navPath);
 
         vscode.commands.executeCommand("vscode.openFolder", uri, false);
     }
@@ -27,28 +28,28 @@ var navigate = function(state) {
     let start = state.get("rootPath");
     start = start === undefined ? "" : start;
 
-    // Does a.navigate using the current path if available
+    // Does a.navigate using the current navPath if available
     query_path.navigate(start, open);
 };
 
-function set(state, path) {
-    // Save path into the config
-    state.update("rootPath", path);
+function set(state, navPath) {
+    // Save navPath into the config
+    state.update("rootPath", navPath);
 };
 
 var set_root = function(state) {
     let start = state.get("rootPath");
     start = start === undefined ? "" : start;
 
-    // Does a.navigate using the current path if available
+    // Does a.navigate using the current navPath if available
     query_path.navigate(start, set.bind(null, state));
 };
 
-function add(state, name, path) {
-    // Registers a name to a path
+function add(state, name, navPath) {
+    // Registers a name to a navPath
     var list = state.get("regPath");
     list = list === undefined ? [] : list;
-    var entry = {name, path};
+    var entry = {name, navPath};
 
     // Check for duplicates
     var found = false;
@@ -63,11 +64,11 @@ function add(state, name, path) {
     state.update("regPath", list);
 };
 
-var nav_path = function(state, name) {
+var nav_navPath = function(state, name) {
    let start = state.get("rootPath");
     start = start === undefined ? "" : start;
     
-    // Does a.navigate using the current path if available
+    // Does a.navigate using the current navPath if available
     query_path.navigate(start, add.bind(null, state, name));
 };
 
@@ -78,7 +79,7 @@ var query_name = function() {
 var add_bookmark = function(state) {
     query_name()
     .then(
-        val => { nav_path(state, val) }
+        val => { nav_navPath(state, val) }
     );
  };
 
@@ -97,7 +98,7 @@ function del(state, name) {
 var del_bookmark = function(state) {
     var list = state.get("regPath");
     if(list === undefined) {
-        vscode.window.showInformationMessage("No registered paths");
+        vscode.window.showInformationMessage("No registered navPaths");
         return;
     }
 
