@@ -1,6 +1,6 @@
 {
-    "name": "fuzzyopen",
-    "displayName": "Fuzzy Code",
+    "name": "codeexplorer",
+    "displayName": "VSCode File Explorer",
     "description": "Provides commands to navigate to and open files/folders from VS Code Command Palette",
     "version": "0.0.1",
     "publisher": "Julwrites",
@@ -12,6 +12,7 @@
     ],
     "activationEvents": [
         "onCommand:extension.navigate",
+        "onCommand:extension.fuzzyFind",
         "onCommand:extension.setRoot",
         "onCommand:extension.addBookmark",
         "onCommand:extension.removeBookmark"
@@ -23,6 +24,10 @@
             "command": "extension.navigate",
             "title": "Navigate"
         }, 
+        {
+            "command": "extension.fuzzyFind",
+            "title": "Fuzzy Find"
+        },
         {
             "command": "extension.setRoot",
             "title": "Set Root Path"
@@ -43,7 +48,8 @@
     "dependencies": {
         "fs": "^0.0.1-security",
         "clone": "^2.0.0",
-        "drivelist": "^5.0.0"
+        "drivelist": "^5.0.0",
+        "directory-tree": "^1.2.1"
     },
     "devDependencies": {
         "typescript": "^2.0.3",
