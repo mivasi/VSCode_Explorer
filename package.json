@@ -2,7 +2,7 @@
     "name": "codeexplorer",
     "displayName": "VSCode File Explorer",
     "description": "Provides commands to navigate to and open files/folders from VS Code Command Palette",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "publisher": "Julwrites",
     "engines": {
         "vscode": "^1.11.0"
@@ -60,5 +60,10 @@
         "eslint": "^3.6.0",
         "@types/node": "^6.0.40",
         "@types/mocha": "^2.2.32"
+    },
+    "homepage": "https://github.com/julwrites/VSCode_FileExplorer/blob/master/README.md",
+    "repository" : {
+        "type": "git",
+        "url": "https://github.com/julwrites/VSCode_FileExplorer.git"
     }
 }
