@@ -2,7 +2,7 @@
     "name": "codeexplorer",
     "displayName": "VSCode File Explorer",
     "description": "Provides commands to navigate to and open files/folders from VS Code Command Palette",
-    "version": "0.0.1",
+    "version": "0.1.0",
     "publisher": "Julwrites",
     "engines": {
         "vscode": "^1.11.0"
@@ -21,26 +21,27 @@
     "main": "./extension",
     "contributes": {
         "commands": [
-        {
-            "command": "extension.navigate",
-            "title": "Navigate"
-        }, 
-        {
-            "command": "extension.fuzzyFind",
-            "title": "Fuzzy Find"
-        },
-        {
-            "command": "extension.setRoot",
-            "title": "Set Root Path"
-        },
-        {
-            "command": "extension.addBookmark",
-            "title": "Add Bookmark"
-        },
-        {
-            "command": "extension.removeBookmark",
-            "title": "Remove Bookmark"
-        }]
+            {
+                "command": "extension.navigate",
+                "title": "Navigate"
+            },
+            {
+                "command": "extension.fuzzyFind",
+                "title": "Fuzzy Find"
+            },
+            {
+                "command": "extension.setRoot",
+                "title": "Set Root Path"
+            },
+            {
+                "command": "extension.addBookmark",
+                "title": "Add Bookmark"
+            },
+            {
+                "command": "extension.removeBookmark",
+                "title": "Remove Bookmark"
+            }
+        ]
     },
     "scripts": {
         "postinstall": "node ./node_modules/vscode/bin/install",

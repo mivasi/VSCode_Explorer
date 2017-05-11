@@ -34,3 +34,9 @@ Fuzzy Find can be a bit slow to start up since it needs to index the workspace r
 ## Release Notes
 
 Initial release of features
+
+## Contributing
+Contributions are welcome at the [GitHub Repository](https://github.com/julwrites/VSCode_FileExplorer)
+
+## License
+This uses the [MIT License](https://github.com/julwrites/VSCode_FileExplorer/blob/master/LICENSE) 
