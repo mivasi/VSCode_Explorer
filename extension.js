@@ -27,7 +27,11 @@ function open(state, navPath) {
     else if(stat.isDirectory()) {
         let uri = vscode.Uri.parse("file:" + navPath);
 
-        vscode.commands.executeCommand("vscode.openFolder", uri, false);
+        vscode.commands.executeCommand("vscode.openFolder", uri, false).then(
+            () => { 
+                // load_fuzzy(state); 
+            }
+        );
     }
 };
 
@@ -46,15 +50,53 @@ var navigate = function(state) {
     query_path.navigate(start, names, open.bind(null, state));
 };
 
+var load_fuzzy = function(state) {
+    return new Promise(
+        (fulfill, reject) => {
+            let root = state.get("rootPath");
+            let workspace = state.get("workspace");
+            let start = undefined;
+
+            // If we don't have a workspace (no folder open), we'll try for the root
+            if(vscode.workspace.rootPath === undefined) {
+                if(root != undefined) {
+                    start = root;
+                }
+            }
+            // If we do have a workspace open, check if we have already loaded it
+            else {
+                if(workspace != vscode.workspace.rootPath) {
+                    workspace = vscode.workspace.rootPath;
+                    state.update("workspace", workspace);
+
+                    start = workspace;
+                }
+                // Do nothing if we have already loaded or started loading it 
+            }
+
+            if(start != undefined) {
+                query_path.fuzzy_load(start, 
+                (dirList) => {
+                    state.update("dirList", dirList);
+                    fulfill();
+                });
+            }
+            else
+                reject();
+        });
+};
+
 var fuzzy_find = function(state) {
-    let root = state.get("rootPath");
-    let start = vscode.workspace.rootPath == undefined ? ( root == undefined ? "" : root ) : vscode.workspace.rootPath;
-    let workspace = state.get("workspace");
-    let dirList = workspace == vscode.workspace.rootPath ? state.get("dirList") : [];
+    load_fuzzy(state).then(
+        () => {
+            let root = state.get("rootPath");
+            let start = vscode.workspace.rootPath == undefined ? ( root == undefined ? "" : root ) : vscode.workspace.rootPath;
+            let workspace = state.get("workspace");
+            let dirList = workspace == vscode.workspace.rootPath ? state.get("dirList") : [];
 
-    dirList = query_path.fuzzy_find(start, dirList, open.bind(null, state));
-
-    state.update("dirList", dirList);
+            query_path.fuzzy_find(start, dirList, open.bind(null, state));
+        } 
+    );
 };
 
 function set(state, navPath) {
@@ -149,6 +191,23 @@ var del_bookmark = function(state) {
     );
 };
 
+var clr_bookmarks = function(state) {
+    // Doesn't matter what bookmarks there are, we'll just replace with empty
+    state.update("bookmarks", []);
+};
+
+function initialize(state) {
+    // If it's the same workspace we left from, just don't index it
+    if(state.get("workspace") === vscode.workspace.rootPath)
+        return;
+
+    // Clear the temporary stuff
+    state.update("workspace", undefined);
+
+    // Attempts to load the current workspace folder
+    // load_fuzzy(state);
+}
+
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 function activate(context) {
@@ -158,6 +217,8 @@ function activate(context) {
     console.log("File Explorer is now available in VS Code");
 
     var state = context.globalState;
+
+    initialize(state);
 
     // The command has been defined in the package.json file
     // Now provide the implementation of the command with registerCommand
@@ -172,6 +233,8 @@ function activate(context) {
     () => { add_bookmark(state) } );
     var delCommand = vscode.commands.registerCommand("extension.removeBookmark",
     () => { del_bookmark(state) } );
+    var clrCommand = vscode.commands.registerCommand("extension.clearBookmarks",
+    () => { clr_bookmarks(state) } );
 
     // Add to a list of disposables that die when the extension deactivates
     context.subscriptions.push(navCommand);
@@ -179,6 +242,7 @@ function activate(context) {
     context.subscriptions.push(setCommand);
     context.subscriptions.push(addCommand);
     context.subscriptions.push(delCommand);
+    context.subscriptions.push(clrCommand);
     context.subscriptions.push(state);
 }
 exports.activate = activate;

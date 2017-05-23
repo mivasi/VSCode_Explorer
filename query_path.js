@@ -169,9 +169,15 @@ function build_dir_list(startPath, dirList) {
     return dirList;
 };
 
-function fuzzy_find(startPath, dirList, callback) {
+function fuzzy_load(startPath, callback) {
+    let dirList = build_dir_list(startPath, []);
+
+    callback(dirList);
+};
+
+function fuzzy_find(startPath, callback) {
     // Prepares the directory list
-    dirList = build_dir_list(startPath, []);
+    let dirList = build_dir_list(startPath, []);
 
     vscode.window.showQuickPick(dirList)
     .then(
@@ -184,3 +190,4 @@ function fuzzy_find(startPath, dirList, callback) {
 };
 
 exports.fuzzy_find = fuzzy_find;
+exports.fuzzy_load = fuzzy_load;
