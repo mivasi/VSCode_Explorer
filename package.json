@@ -18,7 +18,7 @@
         "onCommand:extension.addBookmark",
         "onCommand:extension.removeBookmark",
         "onCommand:extension.clearBookmark",
-        "workspaceContains:*"
+        "onCommand:vscode.openFolder"
     ],
     "main": "./extension",
     "contributes": {
@@ -51,8 +51,13 @@
         "keybindings": [
             {
                 "command": "extension.fuzzyFind",
-                "key": "ctrl + o",
-                "mac": "cmd + o"
+                "key": "shift+alt+o",
+                "mac": "shift+alt+o"
+            },
+            {
+                "command": "extension.navigate",
+                "key": "shift+o",
+                "mac": "shift+o"
             }
         ]
     },

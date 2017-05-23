@@ -10,7 +10,7 @@ function open(state, navPath) {
         return;
 
     let bookmarks = state.get("bookmarks");
-    bookmarks = bookmarks == undefined ? [] : bookmarks;
+    bookmarks = bookmarks === undefined ? [] : bookmarks;
     let bookmark = bookmarks.find(function(bookmark){ return bookmark.name === navPath; });
     if(bookmark != undefined)
         navPath = bookmark.fPath;
@@ -29,7 +29,7 @@ function open(state, navPath) {
 
         vscode.commands.executeCommand("vscode.openFolder", uri, false).then(
             () => { 
-                // load_fuzzy(state); 
+                load_fuzzy(state); 
             }
         );
     }
@@ -37,10 +37,10 @@ function open(state, navPath) {
 
 var navigate = function(state) {
     let root = state.get("rootPath");
-    let start = vscode.workspace.rootPath == undefined ? ( root == undefined ? "" : root ) : vscode.workspace.rootPath;
+    let start = vscode.workspace.rootPath === undefined ? ( root === undefined ? "" : root ) : vscode.workspace.rootPath;
 
     let bookmarks = state.get("bookmarks");
-    bookmarks = bookmarks == undefined ? [] : bookmarks;
+    bookmarks = bookmarks === undefined ? [] : bookmarks;
     let names = [];
     bookmarks.forEach(function(bookmark) {
         names.push(bookmark.name);
@@ -71,7 +71,11 @@ var load_fuzzy = function(state) {
 
                     start = workspace;
                 }
-                // Do nothing if we have already loaded or started loading it 
+                // If we have, return early
+                else {
+                    fulfill();
+                    return;
+                }
             }
 
             if(start != undefined) {
@@ -90,12 +94,15 @@ var fuzzy_find = function(state) {
     load_fuzzy(state).then(
         () => {
             let root = state.get("rootPath");
-            let start = vscode.workspace.rootPath == undefined ? ( root == undefined ? "" : root ) : vscode.workspace.rootPath;
+            let start = vscode.workspace.rootPath === undefined ? ( root === undefined ? "" : root ) : vscode.workspace.rootPath;
             let workspace = state.get("workspace");
-            let dirList = workspace == vscode.workspace.rootPath ? state.get("dirList") : [];
+            let dirList = workspace === vscode.workspace.rootPath ? state.get("dirList") : [];
 
             query_path.fuzzy_find(start, dirList, open.bind(null, state));
-        } 
+        },
+        () => {
+            vscode.window.showErrorMessage("No open folder or root folder");
+        }
     );
 };
 
@@ -106,10 +113,10 @@ function set(state, navPath) {
 
 var set_root = function(state) {
     let root = state.get("rootPath");
-    let start = vscode.workspace.rootPath == undefined ? ( root == undefined ? "" : root ) : vscode.workspace.rootPath;
+    let start = vscode.workspace.rootPath === undefined ? ( root === undefined ? "" : root ) : vscode.workspace.rootPath;
 
     let bookmarks = state.get("bookmarks");
-    bookmarks = bookmarks == undefined ? [] : bookmarks;
+    bookmarks = bookmarks === undefined ? [] : bookmarks;
     let names = [];
     bookmarks.forEach(function(bookmark) {
         names.push(bookmark.name);
@@ -142,7 +149,7 @@ function add(state, name, fPath) {
 
 var nav_path = function(state, name) {
     let root = state.get("rootPath");
-    let start = vscode.workspace.rootPath == undefined ? ( root == undefined ? "" : root ) : vscode.workspace.rootPath;
+    let start = vscode.workspace.rootPath === undefined ? ( root === undefined ? "" : root ) : vscode.workspace.rootPath;
     
     // Does a.navigate using the current navPath if available
     query_path.navigate(start, [], add.bind(null, state, name));

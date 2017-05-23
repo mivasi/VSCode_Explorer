@@ -149,8 +149,9 @@ function build_dir_list_recursive(node, startPath) {
         return dirList;
     }
 
+    // Add all the children's children
     node.children.forEach(function(subNode) {
-        dirList.push(subNode.path.replace(startPath, ""));
+        dirList = [subNode.path.replace(startPath, "")].concat(dirList);
 
         dirList = dirList.concat(build_dir_list_recursive(subNode, startPath));
     }, this);
@@ -164,7 +165,10 @@ function build_dir_list(startPath, dirList) {
     }
 
     let tree = directorytree(startPath);
+    startPath = path.join(startPath, path.sep);
     dirList = build_dir_list_recursive(tree, startPath);
+
+    dirList
 
     return dirList;
 };
@@ -175,18 +179,13 @@ function fuzzy_load(startPath, callback) {
     callback(dirList);
 };
 
-function fuzzy_find(startPath, callback) {
-    // Prepares the directory list
-    let dirList = build_dir_list(startPath, []);
-
+function fuzzy_find(startPath, dirList, callback) {
     vscode.window.showQuickPick(dirList)
     .then(
         val => {
             callback(path.join(startPath, val));
         }
     );
-    
-    return dirList;
 };
 
 exports.fuzzy_find = fuzzy_find;
