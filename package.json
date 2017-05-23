@@ -47,6 +47,13 @@
                 "command": "extension.clearBookmarks",
                 "title": "Bookmarks Clear"
             }
+        ],
+        "keybindings": [
+            {
+                "command": "extension.fuzzyFind",
+                "key": "ctrl + o",
+                "mac": "cmd + o"
+            }
         ]
     },
     "scripts": {
