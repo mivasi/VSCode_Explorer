@@ -3,22 +3,24 @@ VSCode File Explorer adds some commands for navigating to files/folders from VSC
 
 ## Features
 
-![Navigate](/images/Navigate.png)
 Navigate: 
 * Provides a few basic commands to navigate around file system and select files/folders
 * Allows selecting of bookmarked files/folders
 
-![Fuzzy Find Message](/images/Fuzzy_Find_Messages.png)
-![Fuzzy Find Command](/images/Fuzzy_Command.png)
-![Fuzzy Find Action](/images/Fuzzy_Find.png)
+![Navigate](/images/Navigate.png)
+
 Fuzzy Find:
 * Lists files/folders in the workspace root for quick pick
 
-![Set Root](/images/Set_Root.png)
+![Fuzzy Find Message](/images/Fuzzy_Find_Messages.png)
+![Fuzzy Find Command](/images/Fuzzy_Command.png)
+![Fuzzy Find Action](/images/Fuzzy_Find.png)
+
 Set Root:
 * Sets the default root directory if workspace is not open
 
-![Bookmarks](/images/Bookmarks.png)
+![Set Root](/images/Set_Root.png)
+
 Bookmark:
 * Add:
     * Adds a bookmark tagged to a name
@@ -26,6 +28,9 @@ Bookmark:
     * Removes a bookmark tagged to a name
 * Clear:
     * Clears all bookmarks
+
+![Bookmarks](/images/Bookmarks.png)
+
 
 ## Requirements
 

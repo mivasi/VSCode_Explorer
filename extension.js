@@ -167,7 +167,7 @@ function add(state, name, fPath) {
 
     state.update("bookmarks", bookmarks);
 
-    vscode.window.showInformationMessage("Added Bookmark: " + name + " => " + fPath);
+    vscode.window.showInformationMessage("Added " + name + " => " + fPath);
 };
 
 var nav_path = function(state, name) {
@@ -208,7 +208,7 @@ function del(state, name) {
 
     state.update("bookmarks", out);
 
-    vscode.window.showInformationMessage("Removed Bookmark: " + name);
+    vscode.window.showInformationMessage("Removed " + name);
 }; 
 
 var del_bookmark = function(state) {
