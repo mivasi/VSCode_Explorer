@@ -37,15 +37,15 @@
             },
             {
                 "command": "extension.addBookmark",
-                "title": "Bookmark Add"
+                "title": "Bookmark: Add"
             },
             {
                 "command": "extension.removeBookmark",
-                "title": "Bookmark Remove"
+                "title": "Bookmark: Remove"
             },
             {
                 "command": "extension.clearBookmarks",
-                "title": "Bookmarks Clear"
+                "title": "Bookmark: Clear All"
             }
         ],
         "keybindings": [
