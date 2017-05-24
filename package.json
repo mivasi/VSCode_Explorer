@@ -12,13 +12,13 @@
         "Other"
     ],
     "activationEvents": [
+        "*",
         "onCommand:extension.navigate",
         "onCommand:extension.fuzzyFind",
         "onCommand:extension.setRoot",
         "onCommand:extension.addBookmark",
         "onCommand:extension.removeBookmark",
-        "onCommand:extension.clearBookmark",
-        "onCommand:vscode.openFolder"
+        "onCommand:extension.clearBookmark"
     ],
     "main": "./extension",
     "contributes": {

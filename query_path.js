@@ -12,6 +12,8 @@ var commands = [
 ];
 
 function list_drives(callback, bookmarks) {
+    console.log(this.name + ": Listing drives");
+
     var dirList = [];
     drivelist.list(
         (error, drives) => {
@@ -27,6 +29,8 @@ function list_drives(callback, bookmarks) {
 };
 
 function quick_pick(pathCurr, dirList, options, bookmarks, callback) {
+    console.log(this.name + ": Setting up Quick Pick options");
+
     // Add in commands for navigation
     options = options.concat(bookmarks);
     dirList = options.concat(dirList);
@@ -59,6 +63,8 @@ function quick_pick(pathCurr, dirList, options, bookmarks, callback) {
 // An empty string (indicating no directory)
 // Undefined (indicating either invalid or handled input)
 function option_handler(pathCurr, result, bookmarks, callback) {
+    console.log(this.name + ": Reading and handling input from Quick Pick");
+
     // Handling special cases
     switch(result) {
         case undefined: 
@@ -104,6 +110,8 @@ function option_handler(pathCurr, result, bookmarks, callback) {
 };
 
 function navigate_recursive(pathPrev, result, bookmarks, callback) {
+    console.log(this.name + ": Recursively navigate to next folder");
+
     // Resolves the previous path into a real path
     pathPrev = path.resolve(pathPrev);
 
@@ -137,12 +145,16 @@ function navigate_recursive(pathPrev, result, bookmarks, callback) {
 };
 
 function navigate(startPath, bookmarks, callback) {
+    console.log(this.name + ": Entry point for recursive navigation");
+
     navigate_recursive(startPath, "", bookmarks, callback);
 };
 
 exports.navigate = navigate;
 
 function build_dir_list_recursive(node, startPath) {
+    console.log(this.name + ": Recursively building directory list");
+
     let dirList = [];
 
     if(node.children == undefined || node.children.length <= 0) {
@@ -160,6 +172,8 @@ function build_dir_list_recursive(node, startPath) {
 }
 
 function build_dir_list(startPath, dirList) {
+    console.log(this.name + ": Entry point for recursive directory listing");
+
     if(dirList.length != 0) {
         return dirList;
     }
@@ -168,25 +182,15 @@ function build_dir_list(startPath, dirList) {
     startPath = path.join(startPath, path.sep);
     dirList = build_dir_list_recursive(tree, startPath);
 
-    dirList
-
     return dirList;
 };
 
 function fuzzy_load(startPath, callback) {
+    console.log(this.name + ": Building directory listing for fuzzy");
+
     let dirList = build_dir_list(startPath, []);
 
     callback(dirList);
 };
 
-function fuzzy_find(startPath, dirList, callback) {
-    vscode.window.showQuickPick(dirList)
-    .then(
-        val => {
-            callback(path.join(startPath, val));
-        }
-    );
-};
-
-exports.fuzzy_find = fuzzy_find;
 exports.fuzzy_load = fuzzy_load;

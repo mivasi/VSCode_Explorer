@@ -6,6 +6,8 @@ var path = require("path");
 var query_path = require("./query_path.js");
 
 function open(state, navPath) {
+    console.log(this.name + ": Opening " + navPath);
+    
     if(navPath === undefined)
         return;
 
@@ -27,15 +29,13 @@ function open(state, navPath) {
     else if(stat.isDirectory()) {
         let uri = vscode.Uri.parse("file:" + navPath);
 
-        vscode.commands.executeCommand("vscode.openFolder", uri, false).then(
-            () => { 
-                load_fuzzy(state); 
-            }
-        );
+        vscode.commands.executeCommand("vscode.openFolder", uri, false);
     }
 };
 
 var navigate = function(state) {
+    console.log(this.name + ": Starting navigate");
+    
     let root = state.get("rootPath");
     let start = vscode.workspace.rootPath === undefined ? ( root === undefined ? "" : root ) : vscode.workspace.rootPath;
 
@@ -51,6 +51,8 @@ var navigate = function(state) {
 };
 
 var load_fuzzy = function(state) {
+    console.log(this.name + ": Indexing the workspace folder");
+
     return new Promise(
         (fulfill, reject) => {
             let root = state.get("rootPath");
@@ -68,20 +70,27 @@ var load_fuzzy = function(state) {
                 if(workspace != vscode.workspace.rootPath) {
                     workspace = vscode.workspace.rootPath;
                     state.update("workspace", workspace);
-
-                    start = workspace;
                 }
-                // If we have, return early
+                // If we have already loaded it, return early
                 else {
-                    fulfill();
-                    return;
+                    let dirList = state.get("dirList");
+                    if(dirList.length != 0) {
+                        fulfill();
+                        return;
+                    }
                 }
+                
+                start = workspace;
             }
 
             if(start != undefined) {
+                vscode.window.showInformationMessage("Getting Fuzzy Find ready...");
+
                 query_path.fuzzy_load(start, 
                 (dirList) => {
                     state.update("dirList", dirList);
+
+                    vscode.window.showInformationMessage("Fuzzy Find is ready");
                     fulfill();
                 });
             }
@@ -91,6 +100,8 @@ var load_fuzzy = function(state) {
 };
 
 var fuzzy_find = function(state) {
+    console.log(this.name + ": Starting up Fuzzy Find");
+
     load_fuzzy(state).then(
         () => {
             let root = state.get("rootPath");
@@ -98,7 +109,11 @@ var fuzzy_find = function(state) {
             let workspace = state.get("workspace");
             let dirList = workspace === vscode.workspace.rootPath ? state.get("dirList") : [];
 
-            query_path.fuzzy_find(start, dirList, open.bind(null, state));
+            vscode.window.showQuickPick(dirList)
+            .then(
+                val => {
+                    open(state, path.join(start, val));
+                });
         },
         () => {
             vscode.window.showErrorMessage("No open folder or root folder");
@@ -107,11 +122,15 @@ var fuzzy_find = function(state) {
 };
 
 function set(state, navPath) {
+    console.log(this.name + ": Committing " + navPath + " to state");
+
     // Save navPath into the config
     state.update("rootPath", navPath);
 };
 
 var set_root = function(state) {
+    console.log(this.name + ": Starting up navigation for set root");
+
     let root = state.get("rootPath");
     let start = vscode.workspace.rootPath === undefined ? ( root === undefined ? "" : root ) : vscode.workspace.rootPath;
 
@@ -127,6 +146,8 @@ var set_root = function(state) {
 };
 
 function add(state, name, fPath) {
+    console.log(this.name + ": Committing bookmark to state");
+
     // Registers a name to a navPath
     var bookmarks = state.get("bookmarks");
     bookmarks = bookmarks === undefined ? [] : bookmarks;
@@ -145,9 +166,13 @@ function add(state, name, fPath) {
         bookmarks.push(entry);
 
     state.update("bookmarks", bookmarks);
+
+    vscode.window.showInformationMessage("Added Bookmark: " + name + " => " + fPath);
 };
 
 var nav_path = function(state, name) {
+    console.log(this.name + ": Navigation for bookmark adding");
+
     let root = state.get("rootPath");
     let start = vscode.workspace.rootPath === undefined ? ( root === undefined ? "" : root ) : vscode.workspace.rootPath;
     
@@ -156,10 +181,14 @@ var nav_path = function(state, name) {
 };
 
 var query_name = function() {
+    console.log(this.name + ": Query for a bookmark name");
+
     return vscode.window.showInputBox({prompt: "Enter a name"});
 };
 
 var add_bookmark = function(state) {
+    console.log(this.name + ": Starting up navigation for adding bookmark");
+
     query_name()
     .then(
         val => { nav_path(state, val) }
@@ -167,6 +196,8 @@ var add_bookmark = function(state) {
  };
 
 function del(state, name) {
+    console.log(this.name + ": Committing deletion of bookmark to state");
+
     var bookmarks = state.get("bookmarks");
     var out = [];
 
@@ -176,9 +207,13 @@ function del(state, name) {
     }, this);
 
     state.update("bookmarks", out);
+
+    vscode.window.showInformationMessage("Removed Bookmark: " + name);
 }; 
 
 var del_bookmark = function(state) {
+    console.log(this.name + ": Starting up delete bookmark listing");
+
     var bookmarks = state.get("bookmarks");
     if(bookmarks === undefined) {
         vscode.window.showInformationMessage("No bookmarks");
@@ -199,29 +234,25 @@ var del_bookmark = function(state) {
 };
 
 var clr_bookmarks = function(state) {
+    console.log(this.name + ": Clearing all bookmarks");
+
     // Doesn't matter what bookmarks there are, we'll just replace with empty
     state.update("bookmarks", []);
+
+    vscode.window.showInformationMessage("Removed all Bookmarks");
 };
 
 function initialize(state) {
-    // If it's the same workspace we left from, just don't index it
-    if(state.get("workspace") === vscode.workspace.rootPath)
-        return;
-
-    // Clear the temporary stuff
-    state.update("workspace", undefined);
+    console.log(this.name + ": Initializing workspace by loading fuzzy");
 
     // Attempts to load the current workspace folder
-    // load_fuzzy(state);
+    load_fuzzy(state);
 }
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 function activate(context) {
-
-    // Use the console to output diagnostic information (console.log) and errors (console.error)
-    // This line of code will only be executed once when your extension is activated
-    console.log("File Explorer is now available in VS Code");
+    console.log(this.name + ": File Explorer is now available in VS Code");
 
     var state = context.globalState;
 
@@ -256,6 +287,7 @@ exports.activate = activate;
 
 // this method is called when your extension is deactivated
 function deactivate() {
+    console.log(this.name + ": Deactivating extension");
 }
 
 exports.deactivate = deactivate;
