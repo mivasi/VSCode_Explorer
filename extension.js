@@ -8,6 +8,27 @@ var query_path = require("./query_path.js");
 
 // Global defines
 var TIMEOUT = 5000;
+var ROOTPATH = "codeexplorer.rootPath";
+var MRUFOLDER = "codeexplorer.recentFolder";
+var BOOKMARKS = "codeexplorer.bookmarks";
+var WORKSPACE = "codeexplorer.workspace";
+var DIRLIST = "codeexplorer.dirlist";
+
+function open_file(state, navPath) {
+    vscode.workspace.openTextDocument(navPath)
+    .then(
+        function(doc) {
+            vscode.window.showTextDocument(doc);
+        });
+}
+
+function open_folder(state, navPath) {
+    state.update(MRUFOLDER, vscode.workspace.rootPath);
+
+    let uri = vscode.Uri.parse("file:" + navPath);
+
+    vscode.commands.executeCommand("vscode.openFolder", uri, false);
+}
 
 function open(state, navPath) {
     console.log(this.name + ": Opening " + navPath);
@@ -15,7 +36,7 @@ function open(state, navPath) {
     if(navPath === undefined)
         return;
 
-    let bookmarks = state.get("bookmarks");
+    let bookmarks = state.get(BOOKMARKS);
     bookmarks = bookmarks === undefined ? [] : bookmarks;
     let bookmark = bookmarks.find(function(bookmark){ return bookmark.name === navPath; });
     if(bookmark != undefined)
@@ -23,27 +44,20 @@ function open(state, navPath) {
 
     let stat = fs.lstatSync(navPath);
     if(stat.isFile()) {
-        vscode.workspace.openTextDocument(navPath)
-        .then(
-            function(doc) {
-                vscode.window.showTextDocument(doc);
-            }
-        );
+        open_file(state, navPath);
     }
     else if(stat.isDirectory()) {
-        let uri = vscode.Uri.parse("file:" + navPath);
-
-        vscode.commands.executeCommand("vscode.openFolder", uri, false);
+        open_folder(state, navPath);
     }
 };
 
 var navigate = function(state) {
     console.log(this.name + ": Starting navigate");
     
-    let root = state.get("rootPath");
+    let root = state.get(ROOTPATH);
     let start = vscode.workspace.rootPath === undefined ? ( root === undefined ? "" : root ) : vscode.workspace.rootPath;
 
-    let bookmarks = state.get("bookmarks");
+    let bookmarks = state.get(BOOKMARKS);
     bookmarks = bookmarks === undefined ? [] : bookmarks;
     let names = [];
     bookmarks.forEach(function(bookmark) {
@@ -66,8 +80,8 @@ var load_fuzzy = function(state) {
 
     return new Promise(
         (fulfill, reject) => {
-            let root = state.get("rootPath");
-            let workspace = state.get("workspace");
+            let root = state.get(ROOTPATH);
+            let workspace = state.get(WORKSPACE);
             let start = undefined;
 
             // If we don't have a workspace (no folder open), we'll try for the root
@@ -80,11 +94,11 @@ var load_fuzzy = function(state) {
             else {
                 if(workspace != vscode.workspace.rootPath) {
                     workspace = vscode.workspace.rootPath;
-                    state.update("workspace", workspace);
+                    state.update(WORKSPACE, workspace);
                 }
                 // If we have already loaded it, return early
                 else {
-                    let dirList = state.get("dirList");
+                    let dirList = state.get(DIRLIST);
                     if(dirList.length != 0) {
                         on_loaded(fulfill);
                         return;
@@ -97,7 +111,7 @@ var load_fuzzy = function(state) {
             if(start != undefined) {
                 query_path.fuzzy_load(start, 
                 (dirList) => {
-                    state.update("dirList", dirList);
+                    state.update(DIRLIST, dirList);
 
                     on_loaded(fulfill);
                 });
@@ -112,10 +126,10 @@ var fuzzy_find = function(state) {
 
     load_fuzzy(state).then(
         () => {
-            let root = state.get("rootPath");
+            let root = state.get(ROOTPATH);
             let start = vscode.workspace.rootPath === undefined ? ( root === undefined ? "" : root ) : vscode.workspace.rootPath;
-            let workspace = state.get("workspace");
-            let dirList = workspace === vscode.workspace.rootPath ? state.get("dirList") : [];
+            let workspace = state.get(WORKSPACE);
+            let dirList = workspace === vscode.workspace.rootPath ? state.get(DIRLIST) : [];
 
             vscode.window.showQuickPick(dirList)
             .then(
@@ -136,16 +150,16 @@ function set(state, navPath) {
     console.log(this.name + ": Committing " + navPath + " to state");
 
     // Save navPath into the config
-    state.update("rootPath", navPath);
+    state.update(ROOTPATH, navPath);
 };
 
 var set_root = function(state) {
     console.log(this.name + ": Starting up navigation for set root");
 
-    let root = state.get("rootPath");
+    let root = state.get(ROOTPATH);
     let start = vscode.workspace.rootPath === undefined ? ( root === undefined ? "" : root ) : vscode.workspace.rootPath;
 
-    let bookmarks = state.get("bookmarks");
+    let bookmarks = state.get(BOOKMARKS);
     bookmarks = bookmarks === undefined ? [] : bookmarks;
     let names = [];
     bookmarks.forEach(function(bookmark) {
@@ -163,7 +177,7 @@ function add(state, name, fPath) {
     console.log(this.name + ": Committing bookmark to state");
 
     // Registers a name to a navPath
-    var bookmarks = state.get("bookmarks");
+    var bookmarks = state.get(BOOKMARKS);
     bookmarks = bookmarks === undefined ? [] : bookmarks;
     const bookmarkTag = "Bookmark: ";
     name = bookmarkTag.concat(name);
@@ -179,7 +193,7 @@ function add(state, name, fPath) {
     if(!found)
         bookmarks.push(entry);
 
-    state.update("bookmarks", bookmarks);
+    state.update(BOOKMARKS, bookmarks);
 
     vscode.window.setStatusBarMessage("Added " + name + " => " + fPath, TIMEOUT);
 };
@@ -190,7 +204,7 @@ var nav_path = function(state, name) {
 
     console.log(this.name + ": Navigation for bookmark adding");
 
-    let root = state.get("rootPath");
+    let root = state.get(ROOTPATH);
     let start = vscode.workspace.rootPath === undefined ? ( root === undefined ? "" : root ) : vscode.workspace.rootPath;
 
     // Does a.navigate using the current navPath if available
@@ -220,7 +234,7 @@ function del(state, name) {
 
     console.log(this.name + ": Committing deletion of bookmark to state");
 
-    var bookmarks = state.get("bookmarks");
+    var bookmarks = state.get(BOOKMARKS);
     var out = [];
 
     bookmarks.forEach(function(element) {
@@ -228,7 +242,7 @@ function del(state, name) {
             out.push(element);
     }, this);
 
-    state.update("bookmarks", out);
+    state.update(BOOKMARKS, out);
 
     vscode.window.setStatusBarMessage("Removed " + name, TIMEOUT);
 }; 
@@ -236,7 +250,7 @@ function del(state, name) {
 var del_bookmark = function(state) {
     console.log(this.name + ": Starting up delete bookmark listing");
 
-    var bookmarks = state.get("bookmarks");
+    var bookmarks = state.get(BOOKMARKS);
     if(bookmarks === undefined) {
         vscode.window.setStatusBarMessage("No bookmarks", TIMEOUT);
         return;
@@ -259,7 +273,7 @@ var clr_bookmarks = function(state) {
     console.log(this.name + ": Clearing all bookmarks");
 
     // Doesn't matter what bookmarks there are, we'll just replace with empty
-    state.update("bookmarks", []);
+    state.update(BOOKMARKS, []);
 
     vscode.window.setStatusBarMessage("Removed all Bookmarks", TIMEOUT);
 };
