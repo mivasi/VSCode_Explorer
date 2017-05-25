@@ -11,14 +11,26 @@ var assert = require('assert');
 // You can import and use all API from the 'vscode' module
 // as well as import your extension to test it
 var vscode = require('vscode');
-var myExtension = require('../extension');
+var codeexplorer = require('../extension.js');
 
 // Defines a Mocha test suite to group tests of similar kind together
 suite("Extension Tests", function() {
 
-    // Defines a Mocha unit test
-    test("Something 1", function() {
-        assert.equal(-1, [1, 2, 3].indexOf(5));
-        assert.equal(-1, [1, 2, 3].indexOf(0));
+    test("Add Bookmark", function() {
+    });
+
+    test("Remove Bookmark", function() {
+    });
+
+    test("Clear Bookmarks", function() {
+    });
+
+    test("Set Root", function() {
+    });
+
+    test("Navigate", function() {
+    });
+
+    test("Fuzzy Find", function() {
     });
 });

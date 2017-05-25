@@ -6,6 +6,8 @@ var query_path = require("./query_path.js");
 var globals = require("./globals.js");
 
 function resolve_bookmark(state, navPath) {
+    console.log(this.name + ": Checking if this is bookmark");
+
     let bookmarks = state.get(globals.TAG_BOOKMARKS);
     bookmarks = bookmarks === undefined ? [] : bookmarks;
 
@@ -21,6 +23,8 @@ function resolve_bookmark(state, navPath) {
 };
 
 function resolve_mrulist(state, navPath) {
+    console.log(this.name + ": Checking if this is in MRU");
+
     let mruList = state.get(globals.TAG_MRULIST);
     mruList = mruList === undefined ? [] : mruList;
 
@@ -36,6 +40,8 @@ function resolve_mrulist(state, navPath) {
 };
 
 function update_mrulist(state) {
+    console.log(this.name + ": Folder change, updating MRU");
+
     if(vscode.workspace.rootPath != undefined) {
         let mruList = state.get(globals.TAG_MRULIST);
         mruList = mruList === undefined ? [] : mruList;
@@ -55,6 +61,8 @@ function update_mrulist(state) {
 };
 
 function open_file(state, navPath) {
+    console.log(this.name + ": Opening file " + navPath);
+
     vscode.workspace.openTextDocument(navPath)
     .then(
         function(doc) {
@@ -63,6 +71,8 @@ function open_file(state, navPath) {
 };
 
 function open_folder(state, navPath) {
+    console.log(this.name + ": Opening folder " + navPath);
+
     update_mrulist(state);
 
     let uri = vscode.Uri.parse("file:" + navPath);
@@ -93,12 +103,18 @@ var navigate = function(state) {
     
     let root = state.get(globals.TAG_ROOTPATH);
     let start = vscode.workspace.rootPath === undefined ? ( root === undefined ? "" : root ) : vscode.workspace.rootPath;
+    let names = [];
 
     let bookmarks = state.get(globals.TAG_BOOKMARKS);
     bookmarks = bookmarks === undefined ? [] : bookmarks;
-    let names = [];
     bookmarks.forEach(function(bookmark) {
         names.push(bookmark.name);
+    }, this);
+
+    let mruList = state.get(globals.TAG_MRULIST);
+    mruList = mruList === undefined ? [] : mruList;
+    mruList.forEach(function(mru) {
+        names.push(mru);
     }, this);
 
     // Does a navigate using the current navPath if available

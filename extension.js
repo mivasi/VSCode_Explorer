@@ -35,8 +35,12 @@ function activate(context) {
 
     // Events to listen to file system
     var fsWatcher = vscode.workspace.createFileSystemWatcher("*", false, true, false);
-    var addEvent = fsWatcher.onDidCreate(navigation.add_fuzzy.bind(null, state), null, context.subscriptions);
-    var delEvent = fsWatcher.onDidDelete(navigation.del_fuzzy.bind(null, state), null, context.subscriptions);
+    var addEvent = fsWatcher.onDidCreate((uri) => { 
+        navigation.add_fuzzy(state, uri);
+    });
+    var delEvent = fsWatcher.onDidDelete((uri) => { 
+        navigation.del_fuzzy(state, uri); 
+    });
 
     // Add to a list of disposables that die when the extension deactivates
     context.subscriptions.push(navCommand);
