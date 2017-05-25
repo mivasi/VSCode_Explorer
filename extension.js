@@ -122,6 +122,9 @@ var fuzzy_find = function(state) {
 };
 
 function set(state, navPath) {
+    if(navPath === undefined)
+        return;
+
     console.log(this.name + ": Committing " + navPath + " to state");
 
     // Save navPath into the config
@@ -146,6 +149,9 @@ var set_root = function(state) {
 };
 
 function add(state, name, fPath) {
+    if(name === undefined || fPath === undefined)
+        return;
+
     console.log(this.name + ": Committing bookmark to state");
 
     // Registers a name to a navPath
@@ -171,11 +177,14 @@ function add(state, name, fPath) {
 };
 
 var nav_path = function(state, name) {
+    if(name === undefined)
+        return;
+
     console.log(this.name + ": Navigation for bookmark adding");
 
     let root = state.get("rootPath");
     let start = vscode.workspace.rootPath === undefined ? ( root === undefined ? "" : root ) : vscode.workspace.rootPath;
-    
+
     // Does a.navigate using the current navPath if available
     query_path.navigate(start, [], add.bind(null, state, name));
 };
@@ -191,11 +200,16 @@ var add_bookmark = function(state) {
 
     query_name()
     .then(
-        val => { nav_path(state, val) }
+        val => { 
+            nav_path(state, val);
+        }
     );
  };
 
 function del(state, name) {
+    if(name === undefined)
+        return;
+
     console.log(this.name + ": Committing deletion of bookmark to state");
 
     var bookmarks = state.get("bookmarks");
