@@ -52,7 +52,7 @@ What's New?
     * Navigate: Shift + O
     * Fuzzy Find: Shift + Alt + O
 * Front loading of Fuzzy Find's indexing for a quicker Fuzzy Find access
-* Information messages reacting to commands
+* Messages for completion of commands
     * ![Fuzzy_Find_Messages](/images/Fuzzy_Find_Messages.png)
 * New logo! :D
 
