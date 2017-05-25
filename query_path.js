@@ -99,14 +99,24 @@ function option_handler(pathCurr, result, bookmarks, callback) {
     }
 
     // Joins the path with the quick pick
-    pathCurr = path.join(pathCurr, result);
+    let pathTry = path.join(pathCurr, result);
 
-    if(fs.lstatSync(pathCurr).isFile()) {
-        callback(pathCurr);
+    var isFile = undefined;
+    try {
+        isFile = fs.lstatSync(pathTry).isFile();
+    } catch (error) {
+       isFile = false;
+       pathTry = pathCurr;
+
+        vscode.showErrorMessage("No permission to access this");
+    }
+
+    if(isFile === true) {
+        callback(pathTry);
         return undefined;
     }
 
-    return pathCurr;
+    return pathTry;
 };
 
 function navigate_recursive(pathPrev, result, bookmarks, callback) {
