@@ -5,6 +5,10 @@ var fs = require("fs");
 var path = require("path");
 var query_path = require("./query_path.js");
 
+
+// Global defines
+var TIMEOUT = 5000;
+
 function open(state, navPath) {
     console.log(this.name + ": Opening " + navPath);
     
@@ -84,13 +88,13 @@ var load_fuzzy = function(state) {
             }
 
             if(start != undefined) {
-                vscode.window.showInformationMessage("Getting Fuzzy Find ready...");
+                vscode.window.setStatusBarMessage("Getting Fuzzy Find ready...", TIMEOUT);
 
                 query_path.fuzzy_load(start, 
                 (dirList) => {
                     state.update("dirList", dirList);
 
-                    vscode.window.showInformationMessage("Fuzzy Find is ready");
+                    vscode.window.setStatusBarMessage("Fuzzy Find is ready", TIMEOUT);
                     fulfill();
                 });
             }
@@ -173,7 +177,7 @@ function add(state, name, fPath) {
 
     state.update("bookmarks", bookmarks);
 
-    vscode.window.showInformationMessage("Added " + name + " => " + fPath);
+    vscode.window.setStatusBarMessage("Added " + name + " => " + fPath, TIMEOUT);
 };
 
 var nav_path = function(state, name) {
@@ -222,7 +226,7 @@ function del(state, name) {
 
     state.update("bookmarks", out);
 
-    vscode.window.showInformationMessage("Removed " + name);
+    vscode.window.setStatusBarMessage("Removed " + name, TIMEOUT);
 }; 
 
 var del_bookmark = function(state) {
@@ -230,7 +234,7 @@ var del_bookmark = function(state) {
 
     var bookmarks = state.get("bookmarks");
     if(bookmarks === undefined) {
-        vscode.window.showInformationMessage("No bookmarks");
+        vscode.window.setStatusBarMessage("No bookmarks", TIMEOUT);
         return;
     }
 
@@ -253,7 +257,7 @@ var clr_bookmarks = function(state) {
     // Doesn't matter what bookmarks there are, we'll just replace with empty
     state.update("bookmarks", []);
 
-    vscode.window.showInformationMessage("Removed all Bookmarks");
+    vscode.window.setStatusBarMessage("Removed all Bookmarks", TIMEOUT);
 };
 
 function initialize(state) {
