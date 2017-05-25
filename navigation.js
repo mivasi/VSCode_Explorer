@@ -48,7 +48,7 @@ function update_mrulist(state) {
         mruList = mruList === undefined ? [] : mruList;
 
         if(mruList.length >= globals.MRU_MAX)
-            mruList.shift();
+            mruList.pop();
 
         var mru = globals.STR_MRULIST + vscode.workspace.rootPath;
 
