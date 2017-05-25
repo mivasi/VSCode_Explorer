@@ -57,6 +57,13 @@ var navigate = function(state) {
 var load_fuzzy = function(state) {
     console.log(this.name + ": Indexing the workspace folder");
 
+    vscode.window.setStatusBarMessage("Getting Fuzzy Find ready...", TIMEOUT);
+
+    var on_loaded = function(fulfill) {
+        vscode.window.setStatusBarMessage("Fuzzy Find is ready", TIMEOUT);
+        fulfill();
+    };
+
     return new Promise(
         (fulfill, reject) => {
             let root = state.get("rootPath");
@@ -79,7 +86,7 @@ var load_fuzzy = function(state) {
                 else {
                     let dirList = state.get("dirList");
                     if(dirList.length != 0) {
-                        fulfill();
+                        on_loaded(fulfill);
                         return;
                     }
                 }
@@ -88,14 +95,11 @@ var load_fuzzy = function(state) {
             }
 
             if(start != undefined) {
-                vscode.window.setStatusBarMessage("Getting Fuzzy Find ready...", TIMEOUT);
-
                 query_path.fuzzy_load(start, 
                 (dirList) => {
                     state.update("dirList", dirList);
 
-                    vscode.window.setStatusBarMessage("Fuzzy Find is ready", TIMEOUT);
-                    fulfill();
+                    on_loaded(fulfill);
                 });
             }
             else
