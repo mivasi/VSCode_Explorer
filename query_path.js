@@ -108,7 +108,7 @@ function option_handler(pathCurr, result, bookmarks, callback) {
        isFile = false;
        pathTry = pathCurr;
 
-        vscode.showErrorMessage("No permission to access this");
+        vscode.window.showErrorMessage("No permission to access this");
     }
 
     if(isFile === true) {
