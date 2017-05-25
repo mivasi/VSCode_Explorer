@@ -8,10 +8,10 @@ function initialize(state) {
 
     // Attempts to load the current workspace folder
     navigation.load_fuzzy(state);
+
 }
 
 // this method is called when your extension is activated
-// your extension is activated the very first time the command is executed
 function activate(context) {
     console.log(this.name + ": File Explorer is now available in VS Code");
 
@@ -19,9 +19,7 @@ function activate(context) {
 
     initialize(state);
 
-    // The command has been defined in the package.json file
-    // Now provide the implementation of the command with registerCommand
-    // The commandId parameter must match the command field in package.json
+    // Commands matching that of that in package.json
     var navCommand = vscode.commands.registerCommand("extension.navigate", 
     () => { navigation.navigate(state) } );
     var fuzCommand = vscode.commands.registerCommand("extension.fuzzyFind",
@@ -35,6 +33,11 @@ function activate(context) {
     var clrCommand = vscode.commands.registerCommand("extension.clearBookmarks",
     () => { bookmarks.clr_bookmarks(state) } );
 
+    // Events to listen to file system
+    var fsWatcher = vscode.workspace.createFileSystemWatcher("*", false, true, false);
+    var addEvent = fsWatcher.onDidCreate(navigation.add_fuzzy.bind(null, state), null, context.subscriptions);
+    var delEvent = fsWatcher.onDidDelete(navigation.del_fuzzy.bind(null, state), null, context.subscriptions);
+
     // Add to a list of disposables that die when the extension deactivates
     context.subscriptions.push(navCommand);
     context.subscriptions.push(fuzCommand);
@@ -42,6 +45,11 @@ function activate(context) {
     context.subscriptions.push(addCommand);
     context.subscriptions.push(delCommand);
     context.subscriptions.push(clrCommand);
+
+    context.subscriptions.push(fsWatcher);
+    context.subscriptions.push(addEvent);
+    context.subscriptions.push(delEvent);
+
     context.subscriptions.push(state);
 }
 exports.activate = activate;

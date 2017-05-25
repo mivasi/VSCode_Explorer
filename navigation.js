@@ -18,7 +18,7 @@ function resolve_bookmark(state, navPath) {
         navPath = bookmark.fPath;
 
     return navPath;
-}
+};
 
 function resolve_mrulist(state, navPath) {
     let mruList = state.get(globals.TAG_MRULIST);
@@ -33,7 +33,7 @@ function resolve_mrulist(state, navPath) {
         navPath = mru.replace(globals.STR_MRULIST, "");
 
     return navPath;
-}
+};
 
 function update_mrulist(state) {
     if(vscode.workspace.rootPath != undefined) {
@@ -45,14 +45,14 @@ function update_mrulist(state) {
 
         var mru = globals.STR_MRULIST + vscode.workspace.rootPath;
 
-        if(mruList.contains(mru))
-            mruList.remove(mru);
+        if(mruList.includes(mru))
+            mruList.splice(mruList.indexOf(mru), 1);
 
         mruList = [mru].concat(mruList);
 
         state.update(globals.TAG_MRULIST, mruList);
     }
-}
+};
 
 function open_file(state, navPath) {
     vscode.workspace.openTextDocument(navPath)
@@ -60,7 +60,7 @@ function open_file(state, navPath) {
         function(doc) {
             vscode.window.showTextDocument(doc);
         });
-}
+};
 
 function open_folder(state, navPath) {
     update_mrulist(state);
@@ -68,7 +68,7 @@ function open_folder(state, navPath) {
     let uri = vscode.Uri.parse("file:" + navPath);
 
     vscode.commands.executeCommand("vscode.openFolder", uri, false);
-}
+};
 
 function open(state, navPath) {
     console.log(this.name + ": Opening " + navPath);
@@ -105,15 +105,31 @@ var navigate = function(state) {
     query_path.navigate(start, names, open.bind(null, state));
 };
 
+var on_loading_fuzzy = function() {
+    console.log(this.name + ": Before we start loading fuzzy");
+
+    vscode.window.setStatusBarMessage("Getting Fuzzy Find ready...", globals.TIMEOUT);
+};
+
+var on_fuzzy_loaded = function(fulfill) {
+    console.log(this.name + ": After we finish loading fuzzy");
+
+    vscode.window.setStatusBarMessage("Fuzzy Find is ready", globals.TIMEOUT);
+
+    if(fulfill != undefined)
+        fulfill();
+};
+
+var depthCompare = function(left, right) {
+    var count = (str) => { return (str.match(/path.sep/g) || []).length };
+
+    return count(left) - count(right);
+};
+
 var load_fuzzy = function(state) {
     console.log(this.name + ": Indexing the workspace folder");
 
-    vscode.window.setStatusBarMessage("Getting Fuzzy Find ready...", globals.TIMEOUT);
-
-    var on_loaded = function(fulfill) {
-        vscode.window.setStatusBarMessage("Fuzzy Find is ready", globals.TIMEOUT);
-        fulfill();
-    };
+    on_loading_fuzzy();
 
     return new Promise(
         (fulfill, reject) => {
@@ -137,7 +153,7 @@ var load_fuzzy = function(state) {
                 else {
                     let dirList = state.get(globals.TAG_DIRLIST);
                     if(dirList.length != 0) {
-                        on_loaded(fulfill);
+                        on_fuzzy_loaded(fulfill);
                         return;
                     }
                 }
@@ -148,9 +164,10 @@ var load_fuzzy = function(state) {
             if(start != undefined) {
                 query_path.fuzzy_load(start, 
                 (dirList) => {
+                    dirList.sort(depthCompare);
                     state.update(globals.TAG_DIRLIST, dirList);
 
-                    on_loaded(fulfill);
+                    on_fuzzy_loaded(fulfill);
                 });
             }
             else
@@ -158,10 +175,48 @@ var load_fuzzy = function(state) {
         });
 };
 
+var add_fuzzy = function(state, navPath) {
+    console.log(this.name + ": A file has been added, updating fuzzy");
+
+    if(navPath != undefined) {
+        let dirList = state.get(globals.TAG_DIRLIST);
+        let workspace = state.get(globals.TAG_WORKSPACE);
+
+        navPath.replace(path.join(workspace, path.sep), "");
+
+        dirList.push(navPath);
+
+        dirList.sort(depthCompare);
+        state.update(globals.TAG_DIRLIST, dirList);
+
+        on_fuzzy_loaded();
+    }
+};
+
+var del_fuzzy = function(state, navPath) {
+    console.log(this.name + ": File is removed, updating fuzzy");
+
+    if(navPath != undefined) {
+        let dirList = state.get(globals.TAG_DIRLIST);
+        let workspace = state.get(globals.TAG_WORKSPACE);
+
+        navPath.replace(path.join(workspace, path.sep), "");
+
+        var newList = [];
+
+        dirList.forEach(function(entry) {
+            if(!entry.includes(navPath))
+                newList.push(entry);
+        }, this);
+
+        state.update(globals.TAG_DIRLIST, newList);
+    }
+};
+
 var fuzzy_find = function(state) {
     console.log(this.name + ": Starting up Fuzzy Find");
 
-    load_fuzzy(state).then(
+    return load_fuzzy(state).then(
         () => {
             let root = state.get(globals.TAG_ROOTPATH);
             let start = vscode.workspace.rootPath === undefined ? ( root === undefined ? "" : root ) : vscode.workspace.rootPath;
@@ -171,6 +226,9 @@ var fuzzy_find = function(state) {
             vscode.window.showQuickPick(dirList)
             .then(
                 val => {
+                    if(val === undefined)
+                        return;
+
                     open(state, path.join(start, val));
                 });
         },
@@ -208,6 +266,8 @@ var set_root = function(state) {
 };
 
 exports.load_fuzzy = load_fuzzy;
+exports.add_fuzzy = add_fuzzy;
+exports.del_fuzzy = del_fuzzy;
 exports.fuzzy_find = fuzzy_find;
 exports.navigate = navigate;
 exports.set_root = set_root;

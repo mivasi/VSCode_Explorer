@@ -1,7 +1,7 @@
 // Global defines
 exports.TIMEOUT = 5000;
 exports.MRU_MAX = 5;
-// Paths
+// State tags
 exports.TAG_ROOTPATH = "codeexplorer.rootPath";
 exports.TAG_MRULIST = "codeexplorer.recent";
 exports.TAG_BOOKMARKS = "codeexplorer.bookmarks";
