@@ -175,7 +175,9 @@ var on_fuzzy_loaded = function(fulfill) {
 };
 
 var depthCompare = function(left, right) {
-    var count = (str) => { return (str.match(/path.sep/g) || []).length };
+    var count = (str) => { 
+        return (str.split(path.sep)).length;
+    };
 
     return count(left) - count(right);
 };

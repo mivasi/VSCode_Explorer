@@ -6,6 +6,7 @@
 * Front loading of Fuzzy Find's indexing for a quicker Fuzzy Find access
 * Messages for completion of commands
     * ![Fuzzy_Find_Messages](/images/Fuzzy_Find_Messages.png)
+* Bug fixes! :D
 * New logo! :D
 
 
