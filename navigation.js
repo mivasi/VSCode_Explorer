@@ -4,6 +4,7 @@ var fs = require("fs");
 var path = require("path");
 var query_path = require("./query_path.js");
 var globals = require("./globals.js");
+var bookmarks = require("./bookmarks.js");
 
 function resolve_bookmark(state, navPath) {
     console.log(this.name + ": Checking if this is bookmark");
@@ -46,7 +47,7 @@ function update_mrulist(state) {
         let mruList = state.get(globals.TAG_MRULIST);
         mruList = mruList === undefined ? [] : mruList;
 
-        if(mruList.length > globals.MRU_MAX)
+        if(mruList.length >= globals.MRU_MAX)
             mruList.shift();
 
         var mru = globals.STR_MRULIST + vscode.workspace.rootPath;
@@ -55,6 +56,35 @@ function update_mrulist(state) {
             mruList.splice(mruList.indexOf(mru), 1);
 
         mruList = [mru].concat(mruList);
+
+        state.update(globals.TAG_MRULIST, mruList);
+    }
+};
+
+function dead_path(state, navPath) {
+    console.log(this.name + ": Found a dead path, removing from logs");
+
+    // Remove this dead link from bookmarks
+    let bookmarks = state.get(globals.TAG_BOOKMARKS);
+
+    if(bookmarks != undefined) {
+        let bookmark = bookmarks.find(function(bookmark)
+        { 
+        return bookmark.name === navPath;
+        });
+
+        if(bookmark != undefined)
+            bookmarks._del_bookmark(state, bookmark.name);
+    }
+
+    // Remove this dead link from MRU
+    let mruList = state.get(globals.TAG_MRULIST);
+
+    if(mruList != undefined) {
+        var mru = globals.STR_MRULIST + navPath;
+
+        if(mruList.includes(mru))
+            mruList.splice(mruList.indexOf(mru), 1);
 
         state.update(globals.TAG_MRULIST, mruList);
     }
@@ -89,7 +119,15 @@ function open(state, navPath) {
 
     if(navPath === undefined)
         return;
-    let stat = fs.lstatSync(navPath);
+
+    let stat = undefined;
+    try {
+        stat = fs.lstatSync(navPath);
+    } catch (error) {
+        dead_path(state, navPath);
+        return;
+    }
+
     if(stat.isFile()) {
         open_file(state, navPath);
     }
@@ -192,31 +230,38 @@ var load_fuzzy = function(state) {
 };
 
 var add_fuzzy = function(state, navPath) {
-    console.log(this.name + ": A file has been added, updating fuzzy");
+    console.log(this.name + ": Updating fuzzy with addition of " + navPath);
 
     if(navPath != undefined) {
         let dirList = state.get(globals.TAG_DIRLIST);
         let workspace = state.get(globals.TAG_WORKSPACE);
 
-        navPath.replace(path.join(workspace, path.sep), "");
+        query_path.fuzzy_load(navPath,
+        (subList) => {
+            navPath = navPath.replace(path.join(workspace, path.sep), "");
+            let addList = [navPath];
 
-        dirList.push(navPath);
+            subList.forEach(function(entry) {
+                addList.push(path.join(navPath, entry));
+            }, this);
+            dirList = dirList.concat(addList);
 
-        dirList.sort(depthCompare);
-        state.update(globals.TAG_DIRLIST, dirList);
+            dirList.sort(depthCompare);
+            state.update(globals.TAG_DIRLIST, dirList);
 
-        on_fuzzy_loaded();
+            on_fuzzy_loaded();
+        });
     }
 };
 
 var del_fuzzy = function(state, navPath) {
-    console.log(this.name + ": File is removed, updating fuzzy");
+    console.log(this.name + ": Updating fuzzy with removal of " + navPath);
 
     if(navPath != undefined) {
         let dirList = state.get(globals.TAG_DIRLIST);
         let workspace = state.get(globals.TAG_WORKSPACE);
 
-        navPath.replace(path.join(workspace, path.sep), "");
+        navPath = navPath.replace(path.join(workspace, path.sep), "");
 
         var newList = [];
 

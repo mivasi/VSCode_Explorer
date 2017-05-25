@@ -111,5 +111,7 @@ var clr_bookmarks = function(state) {
 };
 
 exports.add_bookmark = add_bookmark;
+exports._add_bookmark = add;
 exports.del_bookmark = del_bookmark;
+exports._del_bookmark = del;
 exports.clr_bookmarks = clr_bookmarks;

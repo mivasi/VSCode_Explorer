@@ -105,8 +105,8 @@ function option_handler(pathCurr, result, bookmarks, callback) {
     try {
         isFile = fs.lstatSync(pathTry).isFile();
     } catch (error) {
-       isFile = false;
-       pathTry = pathCurr;
+        isFile = false;
+        pathTry = pathCurr;
 
         vscode.window.showErrorMessage("No permission to access this");
     }

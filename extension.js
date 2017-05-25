@@ -1,5 +1,6 @@
 // Includes
 var vscode = require("vscode");
+var path = require("path");
 var navigation = require("./navigation.js");
 var bookmarks = require("./bookmarks.js");
 
@@ -34,12 +35,14 @@ function activate(context) {
     () => { bookmarks.clr_bookmarks(state) } );
 
     // Events to listen to file system
-    var fsWatcher = vscode.workspace.createFileSystemWatcher("*", false, true, false);
+    var fsWatcher = vscode.workspace.createFileSystemWatcher(path.join(vscode.workspace.rootPath, "*"), false, true, false);
     var addEvent = fsWatcher.onDidCreate((uri) => { 
-        navigation.add_fuzzy(state, uri);
+        console.log(this.name + ": Created something");
+        navigation.add_fuzzy(state, uri.fsPath);
     });
     var delEvent = fsWatcher.onDidDelete((uri) => { 
-        navigation.del_fuzzy(state, uri); 
+        console.log(this.name + ": Deleted something");
+        navigation.del_fuzzy(state, uri.fsPath); 
     });
 
     // Add to a list of disposables that die when the extension deactivates
