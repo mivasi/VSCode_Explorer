@@ -42,7 +42,10 @@ No extension settings
 
 ## Known Issues
 
-None at present, but issues or requests are welcome on [Github](https://github.com/julwrites/VSCode_FileExplorer)
+* Fuzzy Find list is not sorted well
+* Start-up freezes if there are a massive amount of files in the workspace root
+
+Issues or requests are welcome on [Github](https://github.com/julwrites/VSCode_FileExplorer)
 
 ## Release Notes
 
