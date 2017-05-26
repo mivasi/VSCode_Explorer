@@ -3,7 +3,6 @@ var vscode = require("vscode");
 var path = require("path");
 var fs = require("fs");
 var drivelist = require("drivelist");
-var directorytree = require("directory-tree");
 var clone = require("clone");
 
 var commands = [
@@ -162,21 +161,26 @@ function navigate(startPath, bookmarks, callback) {
 
 exports.navigate = navigate;
 
-function build_dir_list_recursive(node, startPath) {
-    console.log(this.name + ": Recursively building directory list");
+function build_dir_list_recursive(startPath) {
+    console.log(this.name + ": Adding files from " + startPath);
 
     let dirList = [];
+    let tmpList = [];
 
-    if(node.children == undefined || node.children.length <= 0) {
-        return dirList;
+    try {
+        fs.readdirSync(startPath).forEach(
+            (file) => {
+                tmpList.push(path.join(startPath, file));
+        });
+        dirList = dirList.concat(tmpList);
+
+        // Add all the children's children
+        tmpList.forEach(function(subPath) {
+            dirList = dirList.concat(build_dir_list_recursive(subPath));
+        }, this);
+    } catch (error) {
+        console.log(this.name + error);
     }
-
-    // Add all the children's children
-    node.children.forEach(function(subNode) {
-        dirList = [subNode.path.replace(startPath, "")].concat(dirList);
-
-        dirList = dirList.concat(build_dir_list_recursive(subNode, startPath));
-    }, this);
 
     return dirList;
 }
@@ -188,9 +192,12 @@ function build_dir_list(startPath, dirList) {
         return dirList;
     }
 
-    let tree = directorytree(startPath);
     startPath = path.join(startPath, path.sep);
-    dirList = build_dir_list_recursive(tree, startPath);
+    dirList = build_dir_list_recursive(startPath);
+    
+    dirList = dirList.map(function(file) {
+        return file.replace(startPath, "");
+    });
 
     return dirList;
 };

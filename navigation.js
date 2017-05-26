@@ -162,7 +162,7 @@ var navigate = function(state) {
 var on_loading_fuzzy = function() {
     console.log(this.name + ": Before we start loading fuzzy");
 
-    vscode.window.setStatusBarMessage("Getting Fuzzy Find ready...", globals.TIMEOUT);
+    vscode.window.setStatusBarMessage("Getting Fuzzy Find ready... Please wait.", globals.TIMEOUT);
 };
 
 var on_fuzzy_loaded = function(fulfill) {
