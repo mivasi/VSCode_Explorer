@@ -309,6 +309,8 @@ function set(state, navPath) {
 
     // Save navPath into the config
     state.update(globals.TAG_ROOTPATH, navPath);
+
+    vscode.window.setStatusBarMessage("Setting root path to " + navPath, globals.TIMEOUT);
 };
 
 var set_root = function(state) {
