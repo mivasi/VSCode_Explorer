@@ -2,7 +2,7 @@
     "name": "codeexplorer",
     "displayName": "VSCode File Explorer",
     "description": "Provides commands to navigate to and open files/folders from VS Code Command Palette",
-    "version": "0.2.7",
+    "version": "0.2.8",
     "publisher": "Julwrites",
     "engines": {
         "vscode": "^1.11.0"
