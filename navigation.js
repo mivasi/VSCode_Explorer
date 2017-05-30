@@ -175,22 +175,6 @@ var depthCompare = function(left, right) {
     return count(left) - count(right);
 };
 
-var start_load_fuzzy = function(state) {
-    console.log(this.name + ": Pre-step to indexing");
-
-    return new Promise(
-        (fulfill, reject) => {
-            try {
-                vscode.window.setStatusBarMessage("Starting up Fuzzy Find... Please wait.", 
-                        load_fuzzy(state).then(
-                            () => { fulfill(); }
-                            ));
-            } catch (error) {
-                reject();
-            }
-        });
-};
-
 var load_fuzzy = function(state) {
     console.log(this.name + ": Indexing the workspace folder");
 
@@ -283,7 +267,7 @@ var del_fuzzy = function(state, navPath) {
 var fuzzy_find = function(state) {
     console.log(this.name + ": Starting up Fuzzy Find");
 
-    return start_load_fuzzy(state).then(
+    return load_fuzzy(state).then(
         () => {
             let root = state.get(globals.TAG_ROOTPATH);
             let start = vscode.workspace.rootPath === undefined ? ( root === undefined ? "" : root ) : vscode.workspace.rootPath;
@@ -334,7 +318,7 @@ var set_root = function(state) {
     query_path.navigate(start, names, set.bind(null, state));
 };
 
-exports.start_load_fuzzy = start_load_fuzzy;
+exports.load_fuzzy = load_fuzzy;
 exports.add_fuzzy = add_fuzzy;
 exports.del_fuzzy = del_fuzzy;
 exports.fuzzy_find = fuzzy_find;
