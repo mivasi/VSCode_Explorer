@@ -8,8 +8,7 @@ function initialize(state) {
     console.log(this.name + ": Initializing workspace by loading fuzzy");
 
     // Attempts to load the current workspace folder
-    navigation.load_fuzzy(state);
-
+    return navigation.load_fuzzy(state);
 }
 
 // this method is called when your extension is activated
@@ -17,8 +16,6 @@ function activate(context) {
     console.log(this.name + ": File Explorer is now available in VS Code");
 
     var state = context.globalState;
-
-    initialize(state);
 
     // Commands matching that of that in package.json
     var navCommand = vscode.commands.registerCommand("extension.navigate", 
@@ -35,15 +32,17 @@ function activate(context) {
     () => { bookmarks.clr_bookmarks(state) } );
 
     // Events to listen to file system
-    var fsWatcher = vscode.workspace.createFileSystemWatcher(path.join(vscode.workspace.rootPath, "*"), false, true, false);
-    var addEvent = fsWatcher.onDidCreate((uri) => { 
-        console.log(this.name + ": Created something");
-        navigation.add_fuzzy(state, uri.fsPath);
-    });
-    var delEvent = fsWatcher.onDidDelete((uri) => { 
-        console.log(this.name + ": Deleted something");
-        navigation.del_fuzzy(state, uri.fsPath); 
-    });
+    if(vscode.workspace.rootPath != undefined) {
+        var fsWatcher = vscode.workspace.createFileSystemWatcher(path.join(vscode.workspace.rootPath, "*"), false, true, false);
+        var addEvent = fsWatcher.onDidCreate((uri) => { 
+            console.log(this.name + ": Created something");
+            navigation.add_fuzzy(state, uri.fsPath);
+        });
+        var delEvent = fsWatcher.onDidDelete((uri) => { 
+            console.log(this.name + ": Deleted something");
+            navigation.del_fuzzy(state, uri.fsPath); 
+        });
+    }
 
     // Add to a list of disposables that die when the extension deactivates
     context.subscriptions.push(navCommand);
@@ -58,6 +57,8 @@ function activate(context) {
     context.subscriptions.push(delEvent);
 
     context.subscriptions.push(state);
+
+    // initialize(state);
 }
 exports.activate = activate;
 

@@ -54,12 +54,12 @@ What's New?
     * Navigate: Ctrl + Alt + O
     * Fuzzy Find: Shift + Alt + O
 * Fuzzy Find
-    * Front loading of Fuzzy Find's indexing for a quicker Fuzzy Find access
     * Sorting of the Fuzzy Find list by depth
 * Messages for completion of commands
     * ![Fuzzy_Find_Messages](/images/Fuzzy_Find_Messages.png)
 * Bug fixes! :D
-    * Fixing undefined input for bookmarks
+    * Fixed undefined input for bookmarks
+    * Fixed Fuzzy Find indexing occuring on root when no workspace is open
 * New logo! :D
 
 ## Contributing

@@ -166,6 +166,7 @@ function build_dir_list_recursive(startPath) {
 
     let dirList = [];
     let tmpList = [];
+    let accList = [];
 
     try {
         fs.readdirSync(startPath).forEach(
@@ -176,8 +177,14 @@ function build_dir_list_recursive(startPath) {
 
         // Add all the children's children
         tmpList.forEach(function(subPath) {
-            dirList = dirList.concat(build_dir_list_recursive(subPath));
+            accList.push(build_dir_list_recursive(subPath));
         }, this);
+
+        accList.forEach(function(subList) {
+            dirList = dirList.concat(subList);
+        }, this);
+
+
     } catch (error) {
         console.log(this.name + error);
     }

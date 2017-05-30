@@ -185,22 +185,13 @@ var depthCompare = function(left, right) {
 var load_fuzzy = function(state) {
     console.log(this.name + ": Indexing the workspace folder");
 
-    on_loading_fuzzy();
-
     return new Promise(
         (fulfill, reject) => {
-            let root = state.get(globals.TAG_ROOTPATH);
             let workspace = state.get(globals.TAG_WORKSPACE);
             let start = undefined;
 
-            // If we don't have a workspace (no folder open), we'll try for the root
-            if(vscode.workspace.rootPath === undefined) {
-                if(root != undefined) {
-                    start = root;
-                }
-            }
-            // If we do have a workspace open, check if we have already loaded it
-            else {
+            // If we don't have a workspace (no folder open) don't load anything
+            if(vscode.workspace.rootPath != undefined) {
                 if(workspace != vscode.workspace.rootPath) {
                     workspace = vscode.workspace.rootPath;
                     state.update(globals.TAG_WORKSPACE, workspace);
@@ -213,7 +204,8 @@ var load_fuzzy = function(state) {
                         return;
                     }
                 }
-                
+
+                on_loading_fuzzy();
                 start = workspace;
             }
 
@@ -296,7 +288,7 @@ var fuzzy_find = function(state) {
                 });
         },
         () => {
-            vscode.window.showErrorMessage("No open folder or root folder");
+            vscode.window.showErrorMessage("No open folder");
         }
     );
 };
