@@ -159,12 +159,6 @@ var navigate = function(state) {
     query_path.navigate(start, names, open.bind(null, state));
 };
 
-var on_loading_fuzzy = function() {
-    console.log(this.name + ": Before we start loading fuzzy");
-
-    vscode.window.setStatusBarMessage("Getting Fuzzy Find ready... Please wait.", globals.TIMEOUT);
-};
-
 var on_fuzzy_loaded = function(fulfill) {
     console.log(this.name + ": After we finish loading fuzzy");
 
@@ -205,18 +199,20 @@ var load_fuzzy = function(state) {
                     }
                 }
 
-                on_loading_fuzzy();
                 start = workspace;
             }
 
             if(start != undefined) {
-                query_path.fuzzy_load(start, 
-                (dirList) => {
-                    dirList.sort(depthCompare);
-                    state.update(globals.TAG_DIRLIST, dirList);
+                vscode.window.setStatusBarMessage("Starting up Fuzzy Find... Please wait.",
+                new Promise((fulfill, reject) => {
+                    query_path.fuzzy_load(start, 
+                    (dirList) => {
+                        dirList.sort(depthCompare);
+                        state.update(globals.TAG_DIRLIST, dirList);
 
-                    on_fuzzy_loaded(fulfill);
-                });
+                        on_fuzzy_loaded(fulfill);
+                    })
+                }));
             }
             else
                 reject();
