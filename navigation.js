@@ -4,7 +4,6 @@ var fs = require("fs");
 var path = require("path");
 var query_path = require("./query_path.js");
 var globals = require("./globals.js");
-var bookmarks = require("./bookmarks.js");
 
 function resolve_bookmark(state, navPath) {
     console.log(this.name + ": Checking if this is bookmark");
@@ -176,6 +175,22 @@ var depthCompare = function(left, right) {
     return count(left) - count(right);
 };
 
+var start_load_fuzzy = function(state) {
+    console.log(this.name + ": Pre-step to indexing");
+
+    return new Promise(
+        (fulfill, reject) => {
+            try {
+                vscode.window.setStatusBarMessage("Starting up Fuzzy Find... Please wait.", 
+                        load_fuzzy(state).then(
+                            () => { fulfill(); }
+                            ));
+            } catch (error) {
+                reject();
+            }
+        });
+};
+
 var load_fuzzy = function(state) {
     console.log(this.name + ": Indexing the workspace folder");
 
@@ -203,16 +218,17 @@ var load_fuzzy = function(state) {
             }
 
             if(start != undefined) {
-                vscode.window.setStatusBarMessage("Starting up Fuzzy Find... Please wait.",
-                new Promise((fulfill, reject) => {
+                try {
                     query_path.fuzzy_load(start, 
                     (dirList) => {
                         dirList.sort(depthCompare);
                         state.update(globals.TAG_DIRLIST, dirList);
 
                         on_fuzzy_loaded(fulfill);
-                    })
-                }));
+                    });
+                } catch (error) {
+                    reject();
+                }
             }
             else
                 reject();
@@ -267,7 +283,7 @@ var del_fuzzy = function(state, navPath) {
 var fuzzy_find = function(state) {
     console.log(this.name + ": Starting up Fuzzy Find");
 
-    return load_fuzzy(state).then(
+    return start_load_fuzzy(state).then(
         () => {
             let root = state.get(globals.TAG_ROOTPATH);
             let start = vscode.workspace.rootPath === undefined ? ( root === undefined ? "" : root ) : vscode.workspace.rootPath;
@@ -318,7 +334,7 @@ var set_root = function(state) {
     query_path.navigate(start, names, set.bind(null, state));
 };
 
-exports.load_fuzzy = load_fuzzy;
+exports.start_load_fuzzy = start_load_fuzzy;
 exports.add_fuzzy = add_fuzzy;
 exports.del_fuzzy = del_fuzzy;
 exports.fuzzy_find = fuzzy_find;
