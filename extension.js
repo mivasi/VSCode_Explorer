@@ -3,12 +3,15 @@ var vscode = require("vscode");
 var path = require("path");
 var navigation = require("./navigation.js");
 var bookmarks = require("./bookmarks.js");
+var globals = require("./globals.js");
 
 function initialize(state) {
     console.log(this.name + ": Initializing workspace by loading fuzzy");
 
-    // Attempts to load the current workspace folder
-    return navigation.load_fuzzy(state);
+    // Null the workspace if it has changed, to ensure that fuzzy find will reload
+    let workspace = state.get(globals.TAG_WORKSPACE);
+    if(workspace != vscode.workspace.rootPath)
+        state.update(globals.TAG_WORKSPACE, undefined);
 }
 
 // this method is called when your extension is activated
@@ -58,7 +61,7 @@ function activate(context) {
 
     context.subscriptions.push(state);
 
-    // initialize(state);
+    initialize(state);
 }
 exports.activate = activate;
 

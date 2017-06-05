@@ -158,15 +158,6 @@ var navigate = function(state) {
     query_path.navigate(start, names, open.bind(null, state));
 };
 
-var on_fuzzy_loaded = function(fulfill) {
-    console.log(this.name + ": After we finish loading fuzzy");
-
-    vscode.window.setStatusBarMessage("Fuzzy Find is ready", globals.TIMEOUT);
-
-    if(fulfill != undefined)
-        fulfill();
-};
-
 var depthCompare = function(left, right) {
     var count = (str) => { 
         return (str.split(path.sep)).length;
@@ -178,6 +169,8 @@ var depthCompare = function(left, right) {
 var load_fuzzy = function(state) {
     console.log(this.name + ": Indexing the workspace folder");
 
+    vscode.window.setStatusBarMessage("Loading Fuzzy Find... Please wait...", globals.TIMEOUT);
+
     return new Promise(
         (fulfill, reject) => {
             let workspace = state.get(globals.TAG_WORKSPACE);
@@ -188,12 +181,17 @@ var load_fuzzy = function(state) {
                 if(workspace != vscode.workspace.rootPath) {
                     workspace = vscode.workspace.rootPath;
                     state.update(globals.TAG_WORKSPACE, workspace);
+                    state.update(globals.TAG_DIRLIST, []);
                 }
                 // If we have already loaded it, return early
                 else {
                     let dirList = state.get(globals.TAG_DIRLIST);
                     if(dirList.length != 0) {
-                        on_fuzzy_loaded(fulfill);
+                        fulfill();
+                        return;
+                    }
+                    else {
+                        // No op if the directory list is empty, means still loading
                         return;
                     }
                 }
@@ -203,12 +201,12 @@ var load_fuzzy = function(state) {
 
             if(start != undefined) {
                 try {
+                    console.log(this.name + ": Actual Fuzzy Load call");
                     query_path.fuzzy_load(start, 
                     (dirList) => {
                         dirList.sort(depthCompare);
                         state.update(globals.TAG_DIRLIST, dirList);
-
-                        on_fuzzy_loaded(fulfill);
+                        fulfill();
                     });
                 } catch (error) {
                     reject();
@@ -273,6 +271,8 @@ var fuzzy_find = function(state) {
             let start = vscode.workspace.rootPath === undefined ? ( root === undefined ? "" : root ) : vscode.workspace.rootPath;
             let workspace = state.get(globals.TAG_WORKSPACE);
             let dirList = workspace === vscode.workspace.rootPath ? state.get(globals.TAG_DIRLIST) : [];
+
+            vscode.window.setStatusBarMessage("Fuzzy Find is ready", globals.TIMEOUT);
 
             vscode.window.showQuickPick(dirList)
             .then(
