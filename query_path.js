@@ -209,12 +209,19 @@ function build_dir_list(startPath, dirList) {
     return dirList;
 };
 
-function fuzzy_load(startPath, callback) {
-    console.log(this.name + ": Building directory listing for fuzzy");
+function fuzzy_load(startPath) {
+    return new Promise(
+        (fulfill, reject) => {
+            console.log(this.name + ": Building directory listing for fuzzy");
 
-    let dirList = build_dir_list(startPath, []);
+            try {
+                let dirList = build_dir_list(startPath, []);
 
-    callback(dirList);
+                fulfill(dirList);
+            } catch (error) {
+                reject();
+            }
+        });
 };
 
 exports.fuzzy_load = fuzzy_load;

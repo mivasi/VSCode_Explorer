@@ -169,8 +169,6 @@ var depthCompare = function(left, right) {
 var load_fuzzy = function(state) {
     console.log(this.name + ": Indexing the workspace folder");
 
-    vscode.window.setStatusBarMessage("Loading Fuzzy Find... Please wait...", globals.TIMEOUT);
-
     return new Promise(
         (fulfill, reject) => {
             let workspace = state.get(globals.TAG_WORKSPACE);
@@ -182,6 +180,8 @@ var load_fuzzy = function(state) {
                     workspace = vscode.workspace.rootPath;
                     state.update(globals.TAG_WORKSPACE, workspace);
                     state.update(globals.TAG_DIRLIST, []);
+
+                    vscode.window.setStatusBarMessage("Loading Fuzzy Find... Please wait...", globals.TIMEOUT);
                 }
                 // If we have already loaded it, return early
                 else {
@@ -202,11 +202,13 @@ var load_fuzzy = function(state) {
             if(start != undefined) {
                 try {
                     console.log(this.name + ": Actual Fuzzy Load call");
-                    query_path.fuzzy_load(start, 
+                    return query_path.fuzzy_load(start).then( 
                     (dirList) => {
                         dirList.sort(depthCompare);
                         state.update(globals.TAG_DIRLIST, dirList);
                         fulfill();
+                    },
+                    () => {
                     });
                 } catch (error) {
                     reject();
