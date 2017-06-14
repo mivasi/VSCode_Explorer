@@ -5,8 +5,8 @@
     * Fuzzy Find: Shift + Alt + O
 * Fuzzy Find
     * Sorting of the Fuzzy Find list by depth
+    * Setting a depth limit for Fuzzy Find!
 * Messages for completion of commands
-    * ![Fuzzy_Find_Messages](/images/Fuzzy_Find_Messages.png)
 * Bug fixes! :D
     * Fixed Fuzzy Find indexing occuring on root when no workspace is open
     * Fixing undefined input for bookmarks
@@ -14,6 +14,4 @@
 
 
 ## [Unreleased]
-* Fuzzy Find
-    * Async indexing for faster indexing
-    * Bug fix for slow first time startup of Fuzzy Find for large folders
+Feature Requests are welcome at the [GitHub Repository](https://github.com/julwrites/VSCode_FileExplorer)

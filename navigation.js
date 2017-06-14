@@ -166,17 +166,35 @@ var depthCompare = function(left, right) {
     return count(left) - count(right);
 };
 
+var set_depth = function(state) {
+    console.log(this.name + ": Setting depth");
+
+    vscode.window.showInputBox({prompt: "How deep would you like me to search?"}).then(
+        (val) => {
+            if(!isNaN(val))
+            {
+                let intVal = parseInt(val, 10);
+
+                vscode.window.setStatusBarMessage("Setting Fuzzy Find depth to " + intVal, globals.TIMEOUT);
+
+                state.update(globals.TAG_DEPTHLIMIT, intVal);
+                state.update(globals.TAG_FUZZYDIRTY, true);
+            }
+        });
+};
+
 var load_fuzzy = function(state) {
     console.log(this.name + ": Indexing the workspace folder");
 
     return new Promise(
         (fulfill, reject) => {
             let workspace = state.get(globals.TAG_WORKSPACE);
+            let dirty = state.get(globals.TAG_FUZZYDIRTY);
             let start = undefined;
 
             // If we don't have a workspace (no folder open) don't load anything
             if(vscode.workspace.rootPath != undefined) {
-                if(workspace != vscode.workspace.rootPath) {
+                if(dirty) {
                     workspace = vscode.workspace.rootPath;
                     state.update(globals.TAG_WORKSPACE, workspace);
                     state.update(globals.TAG_DIRLIST, []);
@@ -202,7 +220,9 @@ var load_fuzzy = function(state) {
             if(start != undefined) {
                 try {
                     console.log(this.name + ": Actual Fuzzy Load call");
-                    return query_path.fuzzy_load(start).then( 
+                    let limit = state.get(globals.TAG_DEPTHLIMIT);
+
+                    return query_path.fuzzy_load(start, limit).then( 
                     (dirList) => {
                         dirList.sort(depthCompare);
                         state.update(globals.TAG_DIRLIST, dirList);
@@ -219,14 +239,29 @@ var load_fuzzy = function(state) {
         });
 };
 
+var fuzzy_loaded = function(state) {
+    console.log(this.name + ": Resolving post-load things");
+
+    vscode.window.setStatusBarMessage("Fuzzy Find is ready", globals.TIMEOUT);
+
+    state.update(globals.TAG_FUZZYDIRTY, false);
+};
+
+var fuzzy_failed = function(state) {
+    console.log(this.name + ": Fuzzy load failed");
+
+    vscode.window.showErrorMessage("Could not index folder");
+};
+
 var add_fuzzy = function(state, navPath) {
     console.log(this.name + ": Updating fuzzy with addition of " + navPath);
 
     if(navPath != undefined) {
         let dirList = state.get(globals.TAG_DIRLIST);
         let workspace = state.get(globals.TAG_WORKSPACE);
+        let limit = state.get(globals.TAG_DEPTHLIMIT);
 
-        query_path.fuzzy_load(navPath,
+        query_path.fuzzy_load(navPath, limit).then(
         (subList) => {
             navPath = navPath.replace(path.join(workspace, path.sep), "");
             let addList = [navPath];
@@ -239,8 +274,10 @@ var add_fuzzy = function(state, navPath) {
             dirList.sort(depthCompare);
             state.update(globals.TAG_DIRLIST, dirList);
 
-            on_fuzzy_loaded();
-        });
+            fuzzy_loaded(state);
+        },
+        fuzzy_failed
+        );
     }
 };
 
@@ -274,7 +311,7 @@ var fuzzy_find = function(state) {
             let workspace = state.get(globals.TAG_WORKSPACE);
             let dirList = workspace === vscode.workspace.rootPath ? state.get(globals.TAG_DIRLIST) : [];
 
-            vscode.window.setStatusBarMessage("Fuzzy Find is ready", globals.TIMEOUT);
+            fuzzy_loaded(state);
 
             vscode.window.showQuickPick(dirList)
             .then(
@@ -285,9 +322,7 @@ var fuzzy_find = function(state) {
                     open(state, path.join(start, val));
                 });
         },
-        () => {
-            vscode.window.showErrorMessage("No open folder");
-        }
+        fuzzy_failed
     );
 };
 
@@ -320,6 +355,7 @@ var set_root = function(state) {
     query_path.navigate(start, names, set.bind(null, state));
 };
 
+exports.set_depth = set_depth;
 exports.load_fuzzy = load_fuzzy;
 exports.add_fuzzy = add_fuzzy;
 exports.del_fuzzy = del_fuzzy;

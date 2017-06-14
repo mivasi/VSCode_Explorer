@@ -11,7 +11,17 @@ function initialize(state) {
     // Null the workspace if it has changed, to ensure that fuzzy find will reload
     let workspace = state.get(globals.TAG_WORKSPACE);
     if(workspace != vscode.workspace.rootPath)
+    {
         state.update(globals.TAG_WORKSPACE, undefined);
+        state.update(globals.TAG_FUZZYDIRTY, true);
+    }
+
+    let limit = state.get(globals.TAG_DEPTHLIMIT);
+    if(limit === undefined)
+    {
+        state.update(globals.TAG_DEPTHLIMIT, globals.DEFAULT_DEPTH);
+        state.update(globals.TAG_FUZZYDIRTY, true);
+    }
 }
 
 // this method is called when your extension is activated
@@ -27,6 +37,8 @@ function activate(context) {
     () => { navigation.fuzzy_find(state) } );
     var setCommand = vscode.commands.registerCommand("extension.setRoot",
     () => { navigation.set_root(state) } );
+    var limCommand = vscode.commands.registerCommand("extension.limitDepth",
+    () => { navigation.set_depth(state) } );
     var addCommand = vscode.commands.registerCommand("extension.addBookmark", 
     () => { bookmarks.add_bookmark(state) } );
     var delCommand = vscode.commands.registerCommand("extension.removeBookmark",

@@ -161,38 +161,41 @@ function navigate(startPath, bookmarks, callback) {
 
 exports.navigate = navigate;
 
-function build_dir_list_recursive(startPath) {
+function build_dir_list_recursive(startPath, limit) {
     console.log(this.name + ": Adding files from " + startPath);
 
     let dirList = [];
     let tmpList = [];
     let accList = [];
 
-    try {
-        fs.readdirSync(startPath).forEach(
-            (file) => {
-                tmpList.push(path.join(startPath, file));
-        });
-        dirList = dirList.concat(tmpList);
+    if(limit != 0)
+    {
+        try {
+            fs.readdirSync(startPath).forEach(
+                (file) => {
+                    tmpList.push(path.join(startPath, file));
+            });
+            dirList = dirList.concat(tmpList);
 
-        // Add all the children's children
-        tmpList.forEach(function(subPath) {
-            accList.push(build_dir_list_recursive(subPath));
-        }, this);
+            // Add all the children's children
+            tmpList.forEach(function(subPath) {
+                accList.push(build_dir_list_recursive(subPath, limit - 1));
+            }, this);
 
-        accList.forEach(function(subList) {
-            dirList = dirList.concat(subList);
-        }, this);
+            accList.forEach(function(subList) {
+                dirList = dirList.concat(subList);
+            }, this);
 
 
-    } catch (error) {
-        console.log(this.name + error);
+        } catch (error) {
+            console.log(this.name + error);
+        }
     }
 
     return dirList;
 }
 
-function build_dir_list(startPath, dirList) {
+function build_dir_list(startPath, dirList, limit) {
     console.log(this.name + ": Entry point for recursive directory listing");
 
     if(dirList.length != 0) {
@@ -200,7 +203,7 @@ function build_dir_list(startPath, dirList) {
     }
 
     startPath = path.join(startPath, path.sep);
-    dirList = build_dir_list_recursive(startPath);
+    dirList = build_dir_list_recursive(startPath, limit);
     
     dirList = dirList.map(function(file) {
         return file.replace(startPath, "");
@@ -209,13 +212,13 @@ function build_dir_list(startPath, dirList) {
     return dirList;
 };
 
-function fuzzy_load(startPath) {
+function fuzzy_load(startPath, limit) {
     return new Promise(
         (fulfill, reject) => {
             console.log(this.name + ": Building directory listing for fuzzy");
 
             try {
-                let dirList = build_dir_list(startPath, []);
+                let dirList = build_dir_list(startPath, [], limit);
 
                 fulfill(dirList);
             } catch (error) {

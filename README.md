@@ -16,6 +16,11 @@ Fuzzy Find:
 ![Fuzzy Find Command](/images/Fuzzy_Command.png)
 ![Fuzzy Find Action](/images/Fuzzy_Find.png)
 
+Set Fuzzy Depth:
+* Sets depth of indexing for faster or deeper searches
+
+![Fuzzy Find Depth](/images/Fuzzy_Find_Depth.png)
+
 Set Root:
 * Sets the default root directory if workspace is not open
 
