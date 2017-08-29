@@ -258,12 +258,14 @@ var add_fuzzy = function(state, navPath) {
 
     if(navPath != undefined) {
         let dirList = state.get(globals.TAG_DIRLIST);
-        let workspace = state.get(globals.TAG_WORKSPACE);
+        let workspace = path.join(state.get(globals.TAG_WORKSPACE), path.sep);
         let limit = state.get(globals.TAG_DEPTHLIMIT);
+
+        limit = limit - navPath.replace(workspace, "").split(path.sep).length;
 
         query_path.fuzzy_load(navPath, limit).then(
         (subList) => {
-            navPath = navPath.replace(path.join(workspace, path.sep), "");
+            navPath = navPath.replace(workspace, "");
             let addList = [navPath];
 
             subList.forEach(function(entry) {
