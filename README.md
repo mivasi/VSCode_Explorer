@@ -1,9 +1,10 @@
 # VSCode File Explorer README
+
+![status: active](https://img.shields.io/badge/status-active-green.svg)
+
 VSCode File Explorer adds some commands for navigating to files/folders from VSCode's Command Palette. 
 
 ## Features
-
-![status: active](https://img.shields.io/badge/status-active-green.svg)
 
 Navigate: 
 * Provides a few basic commands to navigate around file system and select files/folders
