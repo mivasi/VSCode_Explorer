@@ -49,7 +49,7 @@ function activate(context) {
     // Events to listen to file system
     if(vscode.workspace.rootPath != undefined) {
         var fsWatcher = vscode.workspace.createFileSystemWatcher(
-            path.join(vscode.workspace.rootPath, "**/*"), false, true, false);
+            path.join(vscode.workspace.rootPath, "**/*"), false, false, false);
         var addEvent = fsWatcher.onDidCreate((uri) => { 
             console.log(this.name + ": Created something");
             navigation.add_fuzzy(state, uri.fsPath);
