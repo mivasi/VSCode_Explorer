@@ -64,6 +64,7 @@ function activate(context) {
     context.subscriptions.push(navCommand);
     context.subscriptions.push(fuzCommand);
     context.subscriptions.push(setCommand);
+    context.subscriptions.push(limCommand);
     context.subscriptions.push(addCommand);
     context.subscriptions.push(delCommand);
     context.subscriptions.push(clrCommand);

@@ -292,14 +292,21 @@ var del_fuzzy = function(state, navPath) {
 
         navPath = navPath.replace(path.join(workspace, path.sep), "");
 
-        var newList = [];
+        var delList = [];
 
         dirList.forEach(function(entry) {
-            if(!entry.includes(navPath))
-                newList.push(entry);
+            if(entry.includes(navPath))
+                delList.push(dirList.indexOf(entry));
         }, this);
 
-        state.update(globals.TAG_DIRLIST, newList);
+        delList.sort(function(a, b) { return b < a; });
+
+        delList.forEach(function(index) {
+            console.log(this.name + ": Removing " + index);
+            dirList.splice(index, 1);
+        }, this);
+
+        state.update(globals.TAG_DIRLIST, dirList);
     }
 };
 
