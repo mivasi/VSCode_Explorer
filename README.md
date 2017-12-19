@@ -12,18 +12,6 @@ Navigate:
 
 ![Navigate](/images/Navigate.png)
 
-Fuzzy Find:
-* Lists files/folders in the workspace root for quick pick
-
-![Fuzzy Find Message](/images/Fuzzy_Find_Messages.png)
-![Fuzzy Find Command](/images/Fuzzy_Command.png)
-![Fuzzy Find Action](/images/Fuzzy_Find.png)
-
-Set Fuzzy Depth:
-* Sets depth of indexing for faster or deeper searches
-
-![Fuzzy Find Depth](/images/Fuzzy_Find_Depth.png)
-
 Set Root:
 * Sets the default root directory if workspace is not open
 
@@ -58,16 +46,10 @@ Issues or requests are welcome on [Github](https://github.com/julwrites/VSCode_F
 
 What's New?
 * Added a new command for clearing all bookmarks
-* Keybinding for Navigate and Fuzzy Find
+* Keybinding for Navigate
     * Navigate: Ctrl + Alt + O
-    * Fuzzy Find: Shift + Alt + O
-* Fuzzy Find
-    * Sorting of the Fuzzy Find list by depth
-* Messages for completion of commands
-    * ![Fuzzy_Find_Messages](/images/Fuzzy_Find_Messages.png)
 * Bug fixes! :D
     * Fixed undefined input for bookmarks
-    * Fixed Fuzzy Find indexing occuring on root when no workspace is open
 * New logo! :D
 
 ## Contributing
