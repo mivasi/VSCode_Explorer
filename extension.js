@@ -6,21 +6,10 @@ var bookmarks = require("./bookmarks.js");
 var globals = require("./globals.js");
 
 function initialize(state) {
-    console.log(this.name + ": Initializing workspace by loading fuzzy");
-
     // Null the workspace if it has changed, to ensure that fuzzy find will reload
     let workspace = state.get(globals.TAG_WORKSPACE);
-    if(workspace != vscode.workspace.rootPath)
-    {
+    if (workspace != vscode.workspace.rootPath) {
         state.update(globals.TAG_WORKSPACE, undefined);
-        state.update(globals.TAG_FUZZYDIRTY, true);
-    }
-
-    let limit = state.get(globals.TAG_DEPTHLIMIT);
-    if(limit === undefined)
-    {
-        state.update(globals.TAG_DEPTHLIMIT, globals.DEFAULT_DEPTH);
-        state.update(globals.TAG_FUZZYDIRTY, true);
     }
 }
 
@@ -31,47 +20,23 @@ function activate(context) {
     var state = context.globalState;
 
     // Commands matching that of that in package.json
-    var navCommand = vscode.commands.registerCommand("extension.navigate", 
-    () => { navigation.navigate(state) } );
-    var fuzCommand = vscode.commands.registerCommand("extension.fuzzyFind",
-    () => { navigation.fuzzy_find(state) } );
+    var navCommand = vscode.commands.registerCommand("extension.navigate",
+        () => { navigation.navigate(state) });
     var setCommand = vscode.commands.registerCommand("extension.setRoot",
-    () => { navigation.set_root(state) } );
-    var limCommand = vscode.commands.registerCommand("extension.limitDepth",
-    () => { navigation.set_depth(state) } );
-    var addCommand = vscode.commands.registerCommand("extension.addBookmark", 
-    () => { bookmarks.add_bookmark(state) } );
+        () => { navigation.set_root(state) });
+    var addCommand = vscode.commands.registerCommand("extension.addBookmark",
+        () => { bookmarks.add_bookmark(state) });
     var delCommand = vscode.commands.registerCommand("extension.removeBookmark",
-    () => { bookmarks.del_bookmark(state) } );
+        () => { bookmarks.del_bookmark(state) });
     var clrCommand = vscode.commands.registerCommand("extension.clearBookmarks",
-    () => { bookmarks.clr_bookmarks(state) } );
-
-    // Events to listen to file system
-    if(vscode.workspace.rootPath != undefined) {
-        var fsWatcher = vscode.workspace.createFileSystemWatcher(
-            path.join(vscode.workspace.rootPath, "**/*"), false, false, false);
-        var addEvent = fsWatcher.onDidCreate((uri) => { 
-            console.log(this.name + ": Created something");
-            navigation.add_fuzzy(state, uri.fsPath);
-        });
-        var delEvent = fsWatcher.onDidDelete((uri) => { 
-            console.log(this.name + ": Deleted something");
-            navigation.del_fuzzy(state, uri.fsPath); 
-        });
-    }
+        () => { bookmarks.clr_bookmarks(state) });
 
     // Add to a list of disposables that die when the extension deactivates
     context.subscriptions.push(navCommand);
-    context.subscriptions.push(fuzCommand);
     context.subscriptions.push(setCommand);
-    context.subscriptions.push(limCommand);
     context.subscriptions.push(addCommand);
     context.subscriptions.push(delCommand);
     context.subscriptions.push(clrCommand);
-
-    context.subscriptions.push(fsWatcher);
-    context.subscriptions.push(addEvent);
-    context.subscriptions.push(delEvent);
 
     context.subscriptions.push(state);
 
