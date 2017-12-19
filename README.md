@@ -1,8 +1,8 @@
-# VSCode File Explorer README
+# VSCode Explorer README
 
 ![status: active](https://img.shields.io/badge/status-active-green.svg)
 
-VSCode File Explorer adds some commands for navigating to files/folders from VSCode's Command Palette. 
+VSCode Explorer adds some commands for navigating to files/folders from VSCode's Command Palette. 
 
 ## Features
 
@@ -40,7 +40,7 @@ No extension settings
 
 * Start-up freezes if there are a massive amount of files in the workspace root
 
-Issues or requests are welcome on [Github](https://github.com/julwrites/VSCode_FileExplorer)
+Issues or requests are welcome on [Github](https://github.com/julwrites/VSCode_Explorer)
 
 ## Release Notes
 
@@ -53,7 +53,7 @@ What's New?
 * New logo! :D
 
 ## Contributing
-Contributions are welcome at the [GitHub Repository](https://github.com/julwrites/VSCode_FileExplorer)
+Contributions are welcome at the [GitHub Repository](https://github.com/julwrites/VSCode_Explorer)
 
 ## License
-This uses the [MIT License](https://github.com/julwrites/VSCode_FileExplorer/blob/master/LICENSE) 
+This uses the [MIT License](https://github.com/julwrites/VSCode_Explorer/blob/master/LICENSE) 
